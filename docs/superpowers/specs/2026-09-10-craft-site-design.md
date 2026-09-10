@@ -73,10 +73,14 @@ page. The content model and routes are unchanged; presentation is not.
   craft's own controls belongs to the craft; a click anywhere else on the
   tile, or the expand affordance shown on hover (always shown on touch
   screens), opens the popup.
-- **Bento grid.** Square cells, 2 / 3 / 4 columns by viewport, dense packing.
-  Each craft declares an optional `tile` footprint (`1x1`, `2x1`, `1x2`,
-  `2x2`). Row height derives from the wrapper's width with container units so
-  cells stay square. The stage scales a craft down (never up) to fit its tile.
+- **Masonry grid.** Arsat pointed at inspora.design and recent.design: equal
+  columns, every tile at its own proportion, packing upward into the gaps.
+  Each craft declares an optional `ratio` (width ÷ height, default 1). The
+  grid uses inspora's technique — 1px auto rows, each cell spanning its own
+  height — with the span computed from the measured column width, so the
+  markup is a plain row-aligned grid until JS measures and nothing overlaps.
+  2 / 3 / 4 columns by viewport. The stage scales a craft down (never up) to
+  fit its tile.
 - **Popup instead of a page.** `/[slug]` still prerenders, with its own
   metadata and OG image, but it renders the index with that craft's popup
   open. Opening from the index pushes a history entry so Back closes it;

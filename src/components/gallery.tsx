@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { crafts, getEntry, getNeighbours, tagCounts } from "@/crafts";
 import type { Tag } from "@/crafts/types";
@@ -24,14 +24,42 @@ function Chip({ active, label, onClick }: { active: boolean; label: string; onCl
   );
 }
 
+type Metrics = { columnWidth: number; gap: number };
+
 /**
- * The index: tag filter, bento grid of live tiles, and the craft popup. The
+ * Reads the masonry grid's column width and gap, and keeps them current as
+ * the viewport changes. Tiles turn these into a row span for their ratio.
+ */
+function useGridMetrics(grid: React.RefObject<HTMLDivElement | null>): Metrics | null {
+  const [metrics, setMetrics] = useState<Metrics | null>(null);
+  useLayoutEffect(() => {
+    const el = grid.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => {
+      const style = getComputedStyle(el);
+      const cols = parseInt(style.getPropertyValue("--cols"), 10) || 1;
+      const gap = parseFloat(style.getPropertyValue("--gap")) || 0;
+      const columnWidth = (el.clientWidth - (cols - 1) * gap) / cols;
+      setMetrics((current) =>
+        current && current.columnWidth === columnWidth && current.gap === gap ? current : { columnWidth, gap },
+      );
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [grid]);
+  return metrics;
+}
+
+/**
+ * The index: tag filter, masonry grid of live tiles, and the craft popup. The
  * popup keeps the URL in sync with the History API so every craft stays
  * linkable without leaving the page.
  */
 export function Gallery({ initialSlug }: { initialSlug?: string }) {
   const [tag, setTag] = useState<Tag | null>(null);
   const [active, setActive] = useState<string | null>(initialSlug ?? null);
+  const grid = useRef<HTMLDivElement>(null);
+  const metrics = useGridMetrics(grid);
   /** Whether the open popup pushed a history entry, so closing can pop it. */
   const pushed = useRef(false);
 
@@ -91,14 +119,18 @@ export function Gallery({ initialSlug }: { initialSlug?: string }) {
           <Chip key={t} active={tag === t} label={t} onClick={() => setTag(t)} />
         ))}
       </div>
-      <div className="bento-wrap mt-4 sm:mt-5">
-        <motion.div layout className="bento">
-          <AnimatePresence mode="popLayout" initial={false}>
-            {visible.map((craft, index) => (
-              <CraftTile key={craft.slug} craft={craft} index={index} onOpen={open} />
-            ))}
-          </AnimatePresence>
-        </motion.div>
+      <div ref={grid} className="masonry mt-4 sm:mt-5" data-packed={metrics ? "" : undefined}>
+        <AnimatePresence mode="popLayout" initial={false}>
+          {visible.map((craft, index) => (
+            <CraftTile
+              key={craft.slug}
+              craft={craft}
+              index={index}
+              rowSpan={metrics ? Math.ceil(metrics.columnWidth / (craft.ratio ?? 1) + metrics.gap) : undefined}
+              onOpen={open}
+            />
+          ))}
+        </AnimatePresence>
       </div>
       <AnimatePresence>
         {entry ? (

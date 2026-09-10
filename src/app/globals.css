@@ -53,48 +53,41 @@ body {
 }
 
 /*
- * Index grid. Cells are square; a craft can span one or two of them in either
- * direction and the grid packs densely. Row height is derived from the
- * wrapper's width via container units so cells stay square at every size.
+ * Index grid. Equal columns; every tile keeps its own aspect ratio, and tiles
+ * pack upward into the gaps. Same technique as inspora.design: 1px auto rows,
+ * each cell spanning as many rows as it is tall. Until JS has measured the
+ * column width the same markup is a plain row-aligned grid, so nothing ever
+ * overlaps and the page still works without JS.
  */
-.bento-wrap {
-  container-type: inline-size;
-}
-
-.bento {
+.masonry {
   --cols: 2;
   --gap: 10px;
   display: grid;
-  gap: var(--gap);
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-  grid-auto-rows: calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols));
+  column-gap: var(--gap);
+  row-gap: 0;
   grid-auto-flow: dense;
 }
 
+.masonry[data-packed] {
+  grid-auto-rows: 1px;
+}
+
+.masonry > .cell {
+  padding-bottom: var(--gap);
+}
+
 @media (min-width: 640px) {
-  .bento {
+  .masonry {
     --cols: 3;
     --gap: 14px;
   }
 }
 
 @media (min-width: 1024px) {
-  .bento {
+  .masonry {
     --cols: 4;
   }
-}
-
-.tile-2x1 {
-  grid-column: span 2;
-}
-
-.tile-1x2 {
-  grid-row: span 2;
-}
-
-.tile-2x2 {
-  grid-column: span 2;
-  grid-row: span 2;
 }
 
 /* Tile affordances show on hover; touch screens have no hover, so show them. */

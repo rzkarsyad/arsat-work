@@ -19,11 +19,6 @@ export const TAGS = [
 
 export type Tag = (typeof TAGS)[number];
 
-/** Footprint on the index grid, in square cells: columns x rows. */
-export const TILES = ["1x1", "2x1", "1x2", "2x2"] as const;
-
-export type Tile = (typeof TILES)[number];
-
 export type CraftMedia = {
   type: "image" | "video";
   /** Path under /public, e.g. "/crafts/my-craft/cover.mp4". */
@@ -45,8 +40,12 @@ export type CraftMeta = {
   source?: string;
   /** Show a static image/video on the index instead of the live component. */
   cover?: CraftMedia;
-  /** Size on the index grid. Defaults to "1x1"; wide and tall crafts can ask for more. */
-  tile?: Tile;
+  /**
+   * Proportion of the tile on the index, as width ÷ height. Columns are all the
+   * same width, so this sets the tile's height: 0.8 is portrait, 1 square,
+   * 1.5 landscape. Defaults to 1.
+   */
+  ratio?: number;
 };
 
 export type CraftProps = {

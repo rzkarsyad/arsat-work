@@ -49,7 +49,8 @@ function Fit({ children, padding }: { children: React.ReactNode; padding: number
 
   return (
     <div ref={outer} className="absolute inset-0 flex items-center justify-center">
-      <div ref={inner} style={{ transform: `scale(${scale})` }}>
+      {/* shrink-0 keeps the craft at its natural size so it is scaled, never squeezed into wrapping. */}
+      <div ref={inner} className="shrink-0" style={{ transform: `scale(${scale})` }}>
         {children}
       </div>
     </div>

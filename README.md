@@ -15,8 +15,8 @@ That scaffolds `src/crafts/my-idea/` with two files:
 - **`meta.ts`** — title, one-line description, date, tags, and optional
   `notes` (the write-up), `source` (a reference link), `cover` (a static
   image or video to show on the index instead of the live component) and
-  `tile` (its footprint on the index grid: `"1x1"`, `"2x1"`, `"1x2"` or
-  `"2x2"`).
+  `ratio` (the tile's proportion on the index as width ÷ height: 0.8 is
+  portrait, 1.5 landscape; default 1).
 - **`craft.tsx`** — the exploration itself, a `"use client"` component. It
   receives `{ preview }` so it can render something lighter inside an index
   card than on its own page.
@@ -40,8 +40,9 @@ listed newest first. Tags come from the fixed list in
   dark.
 - Give the component a natural size and let the stage handle the rest. It is
   centred, and scaled down (never up) when a tile is too small for it, so a
-  wide craft still reads inside a 1x1 tile. Ask for a bigger `tile` when the
-  craft needs the room or the hit area.
+  wide craft still reads inside a narrow column. Set `ratio` to give a craft a
+  taller or shorter tile; columns are all the same width and tiles pack into
+  the gaps like Pinterest.
 - The index shows tiles only, no text. Clicks on the craft's own controls stay
   with the craft; a click anywhere else on the tile opens the popup.
 - The site is set in Geist Sans only. Use `tabular-nums` for figures rather
