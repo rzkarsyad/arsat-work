@@ -131,15 +131,19 @@ export default async function CraftPage({ params }: { params: Promise<Params> })
             </Field>
           ) : null}
           <Field label="Code">
-            <a
-              href={`${site.repo}/tree/main/src/crafts/${slug}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 hover:text-accent"
-            >
-              src/crafts/{slug}
-              <ArrowUpRight size={12} />
-            </a>
+            {site.repo ? (
+              <a
+                href={`${site.repo}/tree/main/src/crafts/${slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 hover:text-accent"
+              >
+                src/crafts/{slug}
+                <ArrowUpRight size={12} />
+              </a>
+            ) : (
+              <span className="text-muted">src/crafts/{slug}</span>
+            )}
           </Field>
           <Field label="Keys">
             <span className="text-muted">← older · → newer · esc index</span>

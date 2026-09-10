@@ -64,3 +64,12 @@ Open Graph URLs are built from. Without it the deployment URL is used.
 
 Next.js 16 · React 19 · TypeScript · Tailwind CSS v4 · Motion · next-themes ·
 Geist and Instrument Serif · Vercel Analytics.
+
+## Environment variables
+
+Both are optional and only affect links.
+
+| Variable | Effect |
+| --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | Canonical origin for RSS, sitemap and Open Graph. Falls back to the Vercel deployment URL. |
+| `NEXT_PUBLIC_REPO_URL` | Enables the footer "Source" link and the per-craft "Code" link. They are hidden when it is unset. |

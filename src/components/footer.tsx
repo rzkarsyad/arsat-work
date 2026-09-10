@@ -7,9 +7,11 @@ export function Footer() {
         {site.name} · {new Date().getUTCFullYear()}
       </span>
       <span className="flex gap-4">
-        <a href={site.repo} target="_blank" rel="noreferrer" className="transition-colors hover:text-ink">
-          Source
-        </a>
+        {site.repo ? (
+          <a href={site.repo} target="_blank" rel="noreferrer" className="transition-colors hover:text-ink">
+            Source
+          </a>
+        ) : null}
         <a href="/feed.xml" className="transition-colors hover:text-ink">
           RSS
         </a>

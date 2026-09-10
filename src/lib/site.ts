@@ -10,7 +10,12 @@ export const site = {
   url:
     process.env.NEXT_PUBLIC_SITE_URL ??
     (vercelUrl ? `https://${vercelUrl}` : "http://localhost:3000"),
-  repo: "https://github.com/rzkarsyad/craft-by-arsat",
+  /**
+   * Public repository. Set NEXT_PUBLIC_REPO_URL once the repo exists — the
+   * "Source" and per-craft "Code" links only render when it does, so the site
+   * never ships a link to a repository that is not there.
+   */
+  repo: process.env.NEXT_PUBLIC_REPO_URL,
   links: {
     github: "https://github.com/rzkarsyad",
   },
