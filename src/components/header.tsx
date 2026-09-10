@@ -8,10 +8,10 @@ const iconLink =
 
 export function Header() {
   return (
-    <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
-      <Link href="/" className="flex items-baseline gap-2 rounded-sm">
-        <span className="font-serif text-[27px] italic leading-none text-ink">Craft</span>
-        <span className="text-sm text-muted">by {site.author}</span>
+    <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 sm:px-8">
+      <Link href="/" className="flex items-baseline gap-1.5 rounded-sm">
+        <span className="text-[17px] font-semibold tracking-tight text-ink">Craft</span>
+        <span className="text-[13px] text-muted">by {site.author}</span>
       </Link>
       <nav aria-label="Site" className="flex items-center gap-0.5">
         <a href={site.links.github} target="_blank" rel="noreferrer" aria-label="GitHub" className={iconLink}>

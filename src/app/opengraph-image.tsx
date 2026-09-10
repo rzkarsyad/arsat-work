@@ -9,11 +9,7 @@ export const contentType = "image/png";
 
 export default async function Image() {
   return new ImageResponse(
-    <OgFrame
-      title="Small delights."
-      titleSerif
-      footer={`${entries.length} interaction experiments, UI details & prototypes`}
-    />,
+    <OgFrame title="Interaction experiments." footer={`${entries.length} live explorations by ${site.author}`} />,
     { ...size, fonts: await ogFonts() },
   );
 }

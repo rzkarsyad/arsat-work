@@ -82,3 +82,19 @@ export function GitHub(props: IconProps) {
     </svg>
   );
 }
+
+export function Close(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="m6 6 12 12M18 6 6 18" />
+    </svg>
+  );
+}
+
+export function Expand(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M14 4h6v6M10 20H4v-6M20 4l-6 6M4 20l6-6" />
+    </svg>
+  );
+}

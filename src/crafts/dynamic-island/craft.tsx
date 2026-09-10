@@ -30,7 +30,7 @@ function TimerBody() {
         </svg>
       </span>
       <span className="text-left text-[11px] font-medium uppercase tracking-wider text-white/50">Timer</span>
-      <span className="font-mono text-2xl tabular-nums text-orange-400">
+      <span className="text-2xl font-medium tabular-nums text-orange-400">
         {mm}:{ss}
       </span>
     </div>
@@ -62,7 +62,7 @@ function MusicBody() {
 export default function DynamicIsland() {
   const [mode, setMode] = useState<Mode>("idle");
   return (
-    <div className="flex flex-col items-center gap-5">
+    <div className="flex items-center justify-center p-2">
       <motion.button
         type="button"
         layout
@@ -86,7 +86,6 @@ export default function DynamicIsland() {
           )}
         </AnimatePresence>
       </motion.button>
-      <span className="font-mono text-[11px] uppercase tracking-wider text-muted">Tap to cycle</span>
     </div>
   );
 }

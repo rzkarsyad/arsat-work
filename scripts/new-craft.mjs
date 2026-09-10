@@ -43,6 +43,7 @@ export default defineCraft({
   description: "What this exploration is about, in one line.",
   date: "${today}",
   tags: ["experiment"],
+  // tile: "2x1", // optional footprint on the index: "1x1" (default), "2x1", "1x2" or "2x2"
 });
 `,
 );

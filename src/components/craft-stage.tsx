@@ -1,30 +1,64 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useInView } from "motion/react";
 import { getCraft } from "@/crafts";
-import { Reset } from "./icons";
 
 type Props = {
   slug: string;
-  /** Rendered inside an index card. Passed through to the craft. */
+  /** Rendered inside an index tile. Passed through to the craft. */
   preview?: boolean;
   /** Mount immediately instead of waiting until the stage scrolls into view. */
   eager?: boolean;
-  /** Show a reset control that remounts the craft. */
-  controls?: boolean;
+  /** Change to remount the craft (the popup's Reset control). */
+  runKey?: number;
+  /** Breathing room kept around the craft when it has to scale down. */
+  padding?: number;
   /**
-   * Sizing for the stage. It is always `relative` so the craft can fill it, so
-   * pass size/shape utilities (`h-full w-full`, `aspect-[4/3] rounded-3xl`)
-   * rather than `absolute`, which would collide with that.
+   * The stage has no position of its own so it can fill whatever the caller
+   * positions it in — pass `absolute inset-0`, not a size of your own.
    */
   className?: string;
 };
 
-export function CraftStage({ slug, preview = false, eager = false, controls = false, className = "" }: Props) {
+/**
+ * Centres its child and scales it down (never up) so a craft with a fixed
+ * natural size fits a small tile. Measures layout size, which transforms do
+ * not affect, so there is no feedback loop.
+ */
+function Fit({ children, padding }: { children: React.ReactNode; padding: number }) {
+  const outer = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useLayoutEffect(() => {
+    const o = outer.current;
+    const i = inner.current;
+    if (!o || !i) return;
+    const observer = new ResizeObserver(() => {
+      const width = o.clientWidth - padding * 2;
+      const height = o.clientHeight - padding * 2;
+      const natural = { width: i.offsetWidth, height: i.offsetHeight };
+      if (width <= 0 || height <= 0 || !natural.width || !natural.height) return;
+      setScale(Math.min(1, width / natural.width, height / natural.height));
+    });
+    observer.observe(o);
+    observer.observe(i);
+    return () => observer.disconnect();
+  }, [padding]);
+
+  return (
+    <div ref={outer} className="absolute inset-0 flex items-center justify-center">
+      <div ref={inner} style={{ transform: `scale(${scale})` }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export function CraftStage({ slug, preview = false, eager = false, runKey = 0, padding = 20, className = "" }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "240px 0px" });
-  const [run, setRun] = useState(0);
   const craft = getCraft(slug);
   if (!craft) return null;
 
@@ -32,19 +66,11 @@ export function CraftStage({ slug, preview = false, eager = false, controls = fa
   const mounted = eager || inView;
 
   return (
-    <div ref={ref} className={`stage relative overflow-hidden ${className}`}>
-      <div className="absolute inset-0 flex items-center justify-center p-6">
-        {mounted ? <Component key={run} preview={preview} /> : null}
-      </div>
-      {controls ? (
-        <button
-          type="button"
-          onClick={() => setRun((n) => n + 1)}
-          className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full border border-line bg-surface/90 px-2.5 py-1.5 font-mono text-[11px] text-muted backdrop-blur transition-colors hover:text-ink"
-        >
-          <Reset size={13} />
-          Reset
-        </button>
+    <div ref={ref} className={`overflow-hidden bg-stage ${className}`}>
+      {mounted ? (
+        <Fit padding={padding}>
+          <Component key={runKey} preview={preview} />
+        </Fit>
       ) : null}
     </div>
   );

@@ -51,19 +51,14 @@ export default function TextScramble() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <button
-        type="button"
-        onPointerEnter={advance}
-        onClick={advance}
-        className="font-serif text-5xl italic leading-none text-ink sm:text-6xl"
-        aria-live="polite"
-      >
-        {text}
-      </button>
-      <span className="font-mono text-[11px] uppercase tracking-wider text-muted">
-        Hover or tap
-      </span>
-    </div>
+    <button
+      type="button"
+      onPointerEnter={advance}
+      onClick={advance}
+      className="px-4 text-5xl font-medium leading-none tracking-tight text-ink sm:text-6xl"
+      aria-live="polite"
+    >
+      {text}
+    </button>
   );
 }

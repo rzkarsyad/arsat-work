@@ -34,7 +34,7 @@ function Action({ children, onClick }: { children: React.ReactNode; onClick: () 
     <button
       type="button"
       onClick={onClick}
-      className="rounded-full border border-line bg-surface px-3.5 py-1.5 font-mono text-xs text-ink transition-colors hover:border-line-strong active:bg-stage"
+      className="rounded-full border border-line bg-surface px-3.5 py-1.5 text-xs font-medium text-ink transition-colors hover:border-line-strong active:bg-stage"
     >
       {children}
     </button>
@@ -48,7 +48,7 @@ export default function NumberTicker({ preview }: CraftProps) {
   return (
     <div className="flex flex-col items-center gap-5">
       <div
-        className={`flex font-mono font-medium tabular-nums text-ink ${preview ? "text-[36px]" : "text-[36px] sm:text-[48px]"}`}
+        className={`flex font-medium tabular-nums tracking-tight text-ink ${preview ? "text-[36px]" : "text-[36px] sm:text-[48px]"}`}
         style={{ lineHeight: `${DIGIT_HEIGHT}px` }}
       >
         <AnimatePresence initial={false} mode="popLayout">

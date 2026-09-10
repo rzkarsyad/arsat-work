@@ -5,26 +5,24 @@
 :root {
   --canvas: #faf9f6;
   --surface: #ffffff;
-  --stage: #f4f3ee;
+  --stage: #f3f2ee;
   --ink: #171614;
   --muted: #6b6862;
   --line: rgba(23, 22, 20, 0.08);
   --line-strong: rgba(23, 22, 20, 0.18);
   --accent: #e4552b;
-  --dot: rgba(23, 22, 20, 0.13);
   color-scheme: light;
 }
 
 .dark {
   --canvas: #111110;
   --surface: #1a1918;
-  --stage: #161514;
+  --stage: #21201d;
   --ink: #f2f1ed;
   --muted: #918e86;
   --line: rgba(255, 255, 255, 0.08);
   --line-strong: rgba(255, 255, 255, 0.18);
   --accent: #ff7a4d;
-  --dot: rgba(255, 255, 255, 0.12);
   color-scheme: dark;
 }
 
@@ -38,8 +36,6 @@
   --color-line-strong: var(--line-strong);
   --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
-  --font-serif: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
 }
 
 body {
@@ -56,24 +52,68 @@ body {
   outline-offset: 2px;
 }
 
-/* Preview surface for crafts: a quiet dot grid. */
-.stage {
-  background-color: var(--stage);
-  background-image: radial-gradient(var(--dot) 1px, transparent 1.5px);
-  background-size: 18px 18px;
-  background-position: center;
+/*
+ * Index grid. Cells are square; a craft can span one or two of them in either
+ * direction and the grid packs densely. Row height is derived from the
+ * wrapper's width via container units so cells stay square at every size.
+ */
+.bento-wrap {
+  container-type: inline-size;
+}
+
+.bento {
+  --cols: 2;
+  --gap: 10px;
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-auto-rows: calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols));
+  grid-auto-flow: dense;
+}
+
+@media (min-width: 640px) {
+  .bento {
+    --cols: 3;
+    --gap: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bento {
+    --cols: 4;
+  }
+}
+
+.tile-2x1 {
+  grid-column: span 2;
+}
+
+.tile-1x2 {
+  grid-row: span 2;
+}
+
+.tile-2x2 {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+/* Tile affordances show on hover; touch screens have no hover, so show them. */
+@media (hover: none) {
+  .tile-affordance {
+    opacity: 1;
+  }
 }
 
 /*
- * Card reveal. Done in CSS rather than JS so cards are never gated on
+ * Tile reveal. Done in CSS rather than JS so tiles are never gated on
  * hydration — without the media query they are simply visible. `translate`
  * is used instead of `transform` so it cannot fight Motion's layout writes.
  */
 @media (prefers-reduced-motion: no-preference) {
-  @keyframes card-in {
+  @keyframes tile-in {
     from {
       opacity: 0;
-      translate: 0 14px;
+      translate: 0 12px;
     }
     to {
       opacity: 1;
@@ -81,8 +121,8 @@ body {
     }
   }
 
-  .card-in {
-    animation: card-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-    animation-delay: calc(var(--card-index, 0) * 35ms);
+  .tile-in {
+    animation: tile-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: calc(var(--tile-index, 0) * 30ms);
   }
 }

@@ -13,13 +13,16 @@ npm run new my-idea "My idea"
 That scaffolds `src/crafts/my-idea/` with two files:
 
 - **`meta.ts`** — title, one-line description, date, tags, and optional
-  `notes` (the write-up), `source` (a reference link) and `cover` (a static
-  image or video to show on the index instead of the live component).
+  `notes` (the write-up), `source` (a reference link), `cover` (a static
+  image or video to show on the index instead of the live component) and
+  `tile` (its footprint on the index grid: `"1x1"`, `"2x1"`, `"1x2"` or
+  `"2x2"`).
 - **`craft.tsx`** — the exploration itself, a `"use client"` component. It
   receives `{ preview }` so it can render something lighter inside an index
   card than on its own page.
 
-Edit both, and it appears at `/my-idea` and on the index. Push, and Vercel
+Edit both, and it appears on the index as a live tile; clicking the tile opens
+it in a popup at `/my-idea`, which is also a shareable link. Push, and Vercel
 deploys it.
 
 The index registry (`src/crafts/_metas.ts` and `_registry.ts`) is generated
@@ -35,12 +38,19 @@ listed newest first. Tags come from the fixed list in
 - Use the theme tokens, not raw colours: `bg-surface`, `text-ink`,
   `text-muted`, `border-line`, `text-accent`. They already work in light and
   dark.
-- The stage centres your component and gives it a dot-grid background. Size
-  the component itself; do not try to fill the stage.
+- Give the component a natural size and let the stage handle the rest. It is
+  centred, and scaled down (never up) when a tile is too small for it, so a
+  wide craft still reads inside a 1x1 tile. Ask for a bigger `tile` when the
+  craft needs the room or the hit area.
+- The index shows tiles only, no text. Clicks on the craft's own controls stay
+  with the craft; a click anywhere else on the tile opens the popup.
+- The site is set in Geist Sans only. Use `tabular-nums` for figures rather
+  than a mono face.
 - Keep motion in [`motion`](https://motion.dev). `MotionConfig` already
-  honours `prefers-reduced-motion` for the whole site.
-- The detail page has a Reset control that remounts the component, so it is
-  fine to have a craft end in a finished state.
+  honours `prefers-reduced-motion` for the whole site, and `src/lib/motion.ts`
+  has the shared spring.
+- The popup has a Reset control that remounts the component, so it is fine to
+  have a craft end in a finished state.
 
 ## Commands
 
@@ -63,7 +73,7 @@ Open Graph URLs are built from. Without it the deployment URL is used.
 ## Stack
 
 Next.js 16 · React 19 · TypeScript · Tailwind CSS v4 · Motion · next-themes ·
-Geist and Instrument Serif · Vercel Analytics.
+Geist · Vercel Analytics.
 
 ## Environment variables
 

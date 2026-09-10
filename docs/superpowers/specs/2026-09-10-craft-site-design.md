@@ -62,3 +62,27 @@ themes, system-aware with a manual toggle. Motion respects
 `npm run build` (type-check + lint + static generation) and a manual pass in
 the browser: filtering, card → detail navigation, keyboard shortcuts, theme
 toggle, reset control, RSS and OG image responses.
+
+## Revision — 2026-09-11
+
+Arsat asked for a cleaner, text-light index and a popup instead of a detail
+page. The content model and routes are unchanged; presentation is not.
+
+- **Index tiles only.** Cards lost their title, description, number, tags and
+  date. A tile is the live preview, interactive in place. A click on the
+  craft's own controls belongs to the craft; a click anywhere else on the
+  tile, or the expand affordance shown on hover (always shown on touch
+  screens), opens the popup.
+- **Bento grid.** Square cells, 2 / 3 / 4 columns by viewport, dense packing.
+  Each craft declares an optional `tile` footprint (`1x1`, `2x1`, `1x2`,
+  `2x2`). Row height derives from the wrapper's width with container units so
+  cells stay square. The stage scales a craft down (never up) to fit its tile.
+- **Popup instead of a page.** `/[slug]` still prerenders, with its own
+  metadata and OG image, but it renders the index with that craft's popup
+  open. Opening from the index pushes a history entry so Back closes it;
+  ← and → move between crafts; Escape and the backdrop close. The tile and
+  the panel share a layout id, so the tile morphs into the panel on one
+  spring (`visualDuration` 0.45, `bounce` 0.12) behind a frosted backdrop,
+  and the text blurs in beneath it.
+- **Typography.** Geist Sans only. Instrument Serif and Geist Mono are gone
+  from the UI, the crafts and the OG images. The headline is one short line.
