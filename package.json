@@ -15,6 +15,7 @@
     "new:design": "node scripts/new-design.mjs"
   },
   "dependencies": {
+    "@paper-design/shaders-react": "^0.0.80",
     "@vercel/analytics": "^2.0.1",
     "geist": "^1.7.2",
     "gsap": "^3.15.0",

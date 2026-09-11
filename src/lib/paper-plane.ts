@@ -64,12 +64,8 @@ function el(className: string, style: Partial<CSSStyleDeclaration> = {}) {
 }
 
 export async function foldAndFly(stage: HTMLElement, sheet: HTMLElement, { reduceMotion, onPhase }: FoldOptions = {}) {
-  const [{ gsap }, { MotionPathPlugin }, { DrawSVGPlugin }] = await Promise.all([
-    import("gsap"),
-    import("gsap/MotionPathPlugin"),
-    import("gsap/DrawSVGPlugin"),
-  ]);
-  gsap.registerPlugin(MotionPathPlugin, DrawSVGPlugin);
+  const [{ gsap }, { MotionPathPlugin }] = await Promise.all([import("gsap"), import("gsap/MotionPathPlugin")]);
+  gsap.registerPlugin(MotionPathPlugin);
 
   if (reduceMotion) {
     await gsap.to(sheet, { opacity: 0, duration: 0.3 });
@@ -80,6 +76,22 @@ export async function foldAndFly(stage: HTMLElement, sheet: HTMLElement, { reduc
   const H = sheet.offsetHeight;
   const spineX = W / 2;
 
+  // A WebGL canvas clones blank. Bake its pixels into the sheet's background
+  // first so every folded piece carries the same paper.
+  const canvas = sheet.querySelector("canvas");
+  if (canvas) {
+    try {
+      const url = canvas.toDataURL("image/png");
+      if (url.length > 2000) {
+        sheet.style.backgroundImage = `url(${url})`;
+        sheet.style.backgroundSize = "100% 100%";
+        sheet.style.backgroundBlendMode = "normal";
+      }
+    } catch {
+      // Tainted or unsupported: the CSS paper stays.
+    }
+  }
+
   // The plane is everything that flies; the stack is the folded paper so far.
   const plane = el("absolute inset-0", { transformStyle: "preserve-3d", transformOrigin: `${px(spineX)} ${px(H * 0.45)}` });
   plane.dataset.part = "plane";
@@ -87,8 +99,10 @@ export async function foldAndFly(stage: HTMLElement, sheet: HTMLElement, { reduc
   stack.dataset.part = "stack";
   const base = sheet.cloneNode(true) as HTMLElement;
   base.removeAttribute("data-part");
+  base.querySelectorAll("canvas, [data-part=curl]").forEach((node) => node.remove());
   base.style.position = "absolute";
   base.style.inset = "0";
+  base.style.clipPath = "none";
   base.style.visibility = "visible";
   stack.appendChild(base);
   plane.appendChild(stack);
@@ -170,62 +184,46 @@ export async function foldAndFly(stage: HTMLElement, sheet: HTMLElement, { reduc
   onPhase?.("fold");
   const tip: Pt = { x: spineX, y: 0 };
   // 1. In half, along the spine. The right half comes over the left.
-  await fold([tip, { x: spineX, y: H }], { x: W, y: H / 2 }, 0.65);
-  await gsap.to({}, { duration: 0.06 });
+  await fold([tip, { x: spineX, y: H }], { x: W, y: H / 2 }, 0.5);
   // 2. The outer top corner to the spine: the nose starts.
-  await fold([tip, { x: 0, y: spineX }], { x: 0, y: 0 }, 0.55);
-  await gsap.to({}, { duration: 0.06 });
+  await fold([tip, { x: 0, y: spineX }], { x: 0, y: 0 }, 0.45);
   // 3. The new slanted edge to the spine: a dart.
-  await fold([tip, { x: 0, y: H * 0.82 }], { x: 0, y: H * 0.5 }, 0.55);
-  await gsap.to({}, { duration: 0.08 });
+  await fold([tip, { x: 0, y: H * 0.82 }], { x: 0, y: H * 0.5 }, 0.45);
 
-  // 4. Open: the folded half swings out as the other wing; both rise to a dihedral.
+  // 4. Open and go, as one motion: the folded half swings out as the far wing,
+  // both wings rise to a dihedral, a keel hangs below the spine, the plane
+  // tilts into a three-quarter view and is already leaving as the wings settle.
   onPhase?.("open");
   const hinge = el("absolute inset-0", { transformStyle: "preserve-3d", transformOrigin: `${px(spineX)} 50%`, transform: "rotateY(180deg)" });
   const wing = stack.cloneNode(true) as HTMLElement;
   wing.removeAttribute("data-part");
   Object.assign(wing.style, { transformOrigin: `${px(spineX)} 50%`, transform: "scaleX(-1)", backfaceVisibility: "hidden" });
-  // The far wing turns away from the light.
-  wing.appendChild(el("absolute inset-0", { background: "linear-gradient(90deg, rgba(0,0,0,0.16), rgba(0,0,0,0.04))", clipPath: polygon(silhouette) }));
+  wing.appendChild(el("absolute inset-0", { background: "linear-gradient(90deg, rgba(0,0,0,0.18), rgba(0,0,0,0.05))", clipPath: polygon(silhouette) }));
   hinge.appendChild(wing);
   plane.insertBefore(hinge, stack);
+  stack.appendChild(el("absolute inset-0", { background: "linear-gradient(270deg, rgba(0,0,0,0.07), rgba(255,255,255,0.06))", clipPath: polygon(silhouette) }));
   stack.style.transformOrigin = `${px(spineX)} 50%`;
-  await Promise.all([
-    gsap.to(hinge, { rotateY: 34, duration: 0.7, ease: "power3.out" }),
-    gsap.to(stack, { rotateY: -34, duration: 0.7, ease: "power3.out" }),
-    gsap.to(plane, { rotateX: 52, rotateZ: -12, duration: 0.7, ease: "power3.out" }),
-  ]);
+  const keelRegion = clipToSide(silhouette, [{ x: spineX - 16, y: 0 }, { x: spineX - 16, y: H }], "negative");
+  if (keelRegion.length >= 3) {
+    const keel = el("absolute inset-0 paper", { clipPath: polygon(keelRegion), backgroundColor: "#e6dfd0", transformOrigin: `${px(spineX)} 50%`, transform: "rotateY(-90deg)" });
+    keel.appendChild(el("absolute inset-0", { background: "linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.3))" }));
+    plane.insertBefore(keel, hinge);
+  }
 
-  // 5. Fly, nose first, along a curve that leaves the screen top-right.
   onPhase?.("fly");
   const path = [
     { x: 0, y: 0 },
-    { x: 70, y: -70 },
-    { x: 220, y: -300 },
-    { x: 560, y: -520 },
-    { x: 980, y: -640 },
+    { x: 60, y: -60 },
+    { x: 200, y: -280 },
+    { x: 540, y: -520 },
+    { x: 980, y: -660 },
   ];
-  const trail = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  trail.setAttribute("aria-hidden", "true");
-  Object.assign(trail.style, { position: "absolute", left: px(spineX), top: px(H * 0.45), width: "1px", height: "1px", overflow: "visible", pointerEvents: "none" });
-  const trailPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  trailPath.setAttribute("d", MotionPathPlugin.arrayToRawPath(path, { curviness: 1.2 }).map((seg: number[]) => `M${seg[0]},${seg[1]}C${seg.slice(2).join(",")}`).join(" "));
-  Object.assign(trailPath.style, { fill: "none", stroke: "currentColor", strokeWidth: "2", strokeDasharray: "5 8", strokeLinecap: "round", opacity: "0.75" });
-  trail.appendChild(trailPath);
-  trail.dataset.part = "trail";
-  stage.appendChild(trail);
-  gsap.set(trailPath, { drawSVG: "0%" });
-
   const tl = gsap.timeline();
-  tl.to(plane, {
-    duration: 1.5,
-    ease: "power2.in",
-    motionPath: { path, curviness: 1.2, autoRotate: 90 },
-    scale: 0.22,
-  }, 0)
-    .to(plane, { rotateX: 35, rotateZ: -30, duration: 1.5, ease: "sine.inOut" }, 0)
-    .to(plane, { opacity: 0, duration: 0.35, ease: "power1.in" }, 1.15)
-    .to(trailPath, { drawSVG: "100%", duration: 1.5, ease: "power2.in" }, 0)
-    .to(trailPath, { opacity: 0, duration: 0.4 }, 1.25);
+  tl.to(hinge, { rotateY: 36, duration: 0.55, ease: "power3.out" }, 0)
+    .to(stack, { rotateY: -36, duration: 0.55, ease: "power3.out" }, 0)
+    .to(plane, { rotateX: 54, rotateZ: -10, duration: 0.55, ease: "power3.out" }, 0)
+    .to(plane, { duration: 1.15, ease: "power2.in", motionPath: { path, curviness: 1.25, autoRotate: 90 }, scale: 0.2 }, 0.3)
+    .to(plane, { rotateX: 38, rotateZ: -32, duration: 1.15, ease: "sine.inOut" }, 0.3)
+    .to(plane, { opacity: 0, duration: 0.3, ease: "power1.in" }, 1.15);
   await tl;
 }

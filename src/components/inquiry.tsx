@@ -1,11 +1,15 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useActionState, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useAnimate, useReducedMotion } from "motion/react";
+import { AnimatePresence, animate as animateValue, motion, useAnimate, useMotionTemplate, useMotionValue, useReducedMotion } from "motion/react";
 import { sendInquiry, type InquiryState } from "@/app/actions/inquiry";
 import { foldAndFly } from "@/lib/paper-plane";
 import { site } from "@/lib/site";
 import { Close, Plane } from "./icons";
+
+/** Real paper: fibres, a little roughness, faint crumples. WebGL, loaded only with the letter. */
+const PaperTexture = dynamic(() => import("@paper-design/shaders-react").then((m) => m.PaperTexture), { ssr: false });
 
 const field =
   "w-full border-0 border-b border-(--paper-line) bg-transparent px-0 py-1.5 text-[15px] outline-none focus-visible:outline-none focus:border-(--paper-ink)";
@@ -26,6 +30,56 @@ function Letter({ onSent, onClose }: { onSent: () => void; onClose: () => void }
 
   const stage = useRef<HTMLDivElement>(null);
   const sheet = useRef<HTMLDivElement>(null);
+  /**
+   * The paper texture is a WebGL shader, but it only needs to draw once: its
+   * first frame is baked into the sheet's background and the canvas is let go,
+   * so nothing renders per frame and every folded clone carries the same paper.
+   */
+  const [texture, setTexture] = useState<string | null>(null);
+  useEffect(() => {
+    if (texture) return;
+    let cancelled = false;
+    let tries = 0;
+    const grab = () => {
+      if (cancelled) return;
+      const canvas = sheet.current?.querySelector("canvas");
+      if (canvas) {
+        try {
+          const url = canvas.toDataURL("image/png");
+          // A canvas that has not drawn yet encodes to a tiny transparent PNG.
+          if (url.length > 20000) {
+            setTexture(url);
+            return;
+          }
+        } catch {
+          return;
+        }
+      }
+      if (++tries < 90) requestAnimationFrame(grab);
+    };
+    requestAnimationFrame(grab);
+    return () => {
+      cancelled = true;
+    };
+  }, [texture]);
+
+  /** Size of the lifted corner, in px. It breathes while the letter is open, as if in a draught. */
+  const curl = useMotionValue(0);
+  const curlClip = useMotionTemplate`polygon(0 0, 100% 0, 100% calc(100% - ${curl}px), calc(100% - ${curl}px) 100%, 0 100%)`;
+  const curlSize = useMotionTemplate`${curl}px`;
+
+  useEffect(() => {
+    if (reduceMotion) {
+      curl.set(40);
+      return;
+    }
+    const lift = animateValue(curl, 42, { duration: 0.9, ease: [0.2, 0.8, 0.2, 1], delay: 0.35 });
+    const breathe = animateValue(curl, [42, 52, 38, 56, 44, 42], { duration: 7, ease: "easeInOut", repeat: Infinity, delay: 1.25 });
+    return () => {
+      lift.stop();
+      breathe.stop();
+    };
+  }, [curl, reduceMotion]);
 
   useEffect(() => {
     if (!state || state.ok !== true) return;
@@ -33,9 +87,11 @@ function Letter({ onSent, onClose }: { onSent: () => void; onClose: () => void }
     (async () => {
       try {
         if (!reduceMotion) {
-          // The writing lifts off the page before it folds.
-          await animate("[data-part=fields]", { opacity: 0, y: -4 }, { duration: 0.24 });
-          await new Promise((r) => setTimeout(r, 180));
+          // The writing lifts off the page and the corner settles flat, then it folds.
+          await Promise.all([
+            animate("[data-part=fields]", { opacity: 0, y: -4 }, { duration: 0.2 }),
+            animateValue(curl, 0, { duration: 0.3, ease: [0.4, 0, 0.2, 1] }),
+          ]);
         }
         if (stage.current && sheet.current) await foldAndFly(stage.current, sheet.current, { reduceMotion: !!reduceMotion });
       } catch (error) {
@@ -47,7 +103,7 @@ function Letter({ onSent, onClose }: { onSent: () => void; onClose: () => void }
     return () => {
       cancelled = true;
     };
-  }, [state, animate, onSent, reduceMotion]);
+  }, [state, animate, onSent, reduceMotion, curl]);
 
   useEffect(() => {
     if (state && state.ok === false) animate(scope.current, { x: [0, -7, 7, -5, 5, 0] }, { duration: 0.4 });
@@ -64,7 +120,39 @@ function Letter({ onSent, onClose }: { onSent: () => void; onClose: () => void }
         className="letter relative"
       >
         {/* The sheet. Its clones are what fold; the writing sits on top. */}
-        <div ref={sheet} data-part="sheet" className="paper paper-edge pointer-events-none absolute inset-0 rounded-[10px]" />
+        <motion.div
+          ref={sheet}
+          data-part="sheet"
+          style={{ clipPath: curlClip, ...(texture ? { backgroundImage: `url(${texture})`, backgroundSize: "100% 100%", backgroundBlendMode: "normal" } : {}) }}
+          className="paper pointer-events-none absolute inset-0 overflow-hidden rounded-[10px]"
+        >
+          {texture ? null : (
+          <PaperTexture
+            className="absolute inset-0 h-full w-full"
+            colorBack="#fcf9f2"
+            colorFront="#e4dccb"
+            contrast={0.22}
+            roughness={0.3}
+            fiber={0.2}
+            fiberSize={0.18}
+            crumples={0.06}
+            crumpleSize={0.4}
+            folds={0.05}
+            foldCount={2}
+            drops={0.14}
+            seed={12}
+            scale={0.9}
+            webGlContextAttributes={{ preserveDrawingBuffer: true }}
+          />
+          )}
+          {/* The lifted corner: the paper's back, lit along its curved edge, with its shadow on the page. */}
+          <motion.div data-part="curl" style={{ width: curlSize, height: curlSize }} className="absolute bottom-0 right-0">
+            <div className="absolute inset-0" style={{ clipPath: "polygon(0 0, 100% 0, 0 100%)", background: "linear-gradient(135deg, rgba(0,0,0,0.16), rgba(0,0,0,0.04) 55%, rgba(0,0,0,0) 62%)" }} />
+            <div className="absolute inset-0" style={{ clipPath: "polygon(0 0, 100% 0, 0 100%)", background: "radial-gradient(120% 120% at 100% 100%, #d8cfbd 0%, #ece5d6 38%, #fbf8f1 62%, #ffffff 100%)", filter: "drop-shadow(-1px -1px 1px rgba(0,0,0,0.12))" }} />
+          </motion.div>
+        </motion.div>
+        {/* The sheet's soft edge, drawn behind it so the curl can cut into it. */}
+        <div aria-hidden className="paper-edge pointer-events-none absolute inset-0 -z-10 rounded-[10px]" />
         {/* Where the folding and the flight happen, in front of the sheet. */}
         <div ref={stage} data-part="stage" className="pointer-events-none absolute inset-0 z-20 text-canvas" style={{ perspective: 1400, transformStyle: "preserve-3d" }} />
 
@@ -112,14 +200,17 @@ function Letter({ onSent, onClose }: { onSent: () => void; onClose: () => void }
           </div>
         </form>
 
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute -right-3 -top-3 z-30 flex h-8 w-8 items-center justify-center rounded-full bg-surface text-muted shadow-md ring-1 ring-line transition-colors hover:text-ink"
-        >
-          <Close size={14} />
-        </button>
+        {sealed ? null : (
+          <button
+            type="button"
+            data-part="close"
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute -right-3 -top-3 z-30 flex h-8 w-8 items-center justify-center rounded-full bg-surface text-muted shadow-md ring-1 ring-line transition-colors hover:text-ink"
+          >
+            <Close size={14} />
+          </button>
+        )}
       </motion.div>
     </div>
   );
