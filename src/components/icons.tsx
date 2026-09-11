@@ -66,23 +66,6 @@ export function Moon(props: IconProps) {
   );
 }
 
-export function Rss(props: IconProps) {
-  return (
-    <svg {...base(props)}>
-      <path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16" />
-      <circle cx="5" cy="19" r="1" fill="currentColor" />
-    </svg>
-  );
-}
-
-export function GitHub(props: IconProps) {
-  return (
-    <svg {...base(props)} stroke="none" fill="currentColor">
-      <path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.6 9.6 0 0 1 12 6.84c.85 0 1.71.11 2.51.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" />
-    </svg>
-  );
-}
-
 export function Close(props: IconProps) {
   return (
     <svg {...base(props)}>
@@ -95,6 +78,41 @@ export function Expand(props: IconProps) {
   return (
     <svg {...base(props)}>
       <path d="M14 4h6v6M10 20H4v-6M20 4l-6 6M4 20l6-6" />
+    </svg>
+  );
+}
+
+export function XLogo(props: IconProps) {
+  return (
+    <svg {...base(props)} stroke="none" fill="currentColor">
+      <path d="M17.7 3h3.1l-6.8 7.8L22 21h-6.3l-4.9-6.4L5.2 21H2.1l7.3-8.3L1.7 3h6.4l4.4 5.9L17.7 3Zm-1.1 16.2h1.7L7.1 4.7H5.3l11.3 14.5Z" />
+    </svg>
+  );
+}
+
+export function LinkedIn(props: IconProps) {
+  return (
+    <svg {...base(props)} stroke="none" fill="currentColor">
+      <path d="M20.4 2H3.6A1.6 1.6 0 0 0 2 3.6v16.8A1.6 1.6 0 0 0 3.6 22h16.8a1.6 1.6 0 0 0 1.6-1.6V3.6A1.6 1.6 0 0 0 20.4 2ZM8 19H5V9.5h3V19ZM6.5 8.2a1.7 1.7 0 1 1 0-3.5 1.7 1.7 0 0 1 0 3.5ZM19 19h-3v-4.6c0-1.1 0-2.5-1.5-2.5S12.7 13 12.7 14.3V19h-3V9.5h2.9v1.3h.1c.4-.8 1.4-1.6 2.9-1.6 3 0 3.6 2 3.6 4.6V19Z" />
+    </svg>
+  );
+}
+
+/** Contra's four-pointed star, split by its cross. */
+export function Contra(props: IconProps) {
+  return (
+    <svg {...base(props)} stroke="none">
+      <path fill="currentColor" d="M12 2.5c.6 4.8 4.7 8.9 9.5 9.5-4.8.6-8.9 4.7-9.5 9.5-.6-4.8-4.7-8.9-9.5-9.5 4.8-.6 8.9-4.7 9.5-9.5Z" />
+      <path d="M12 2.5v19M2.5 12h19" stroke="var(--canvas)" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+export function Plane(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M21 3 3 10.5l7.5 3L13.5 21 21 3Z" />
+      <path d="m10.5 13.5 10.5-10.5" />
     </svg>
   );
 }

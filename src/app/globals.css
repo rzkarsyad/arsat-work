@@ -128,3 +128,44 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/*
+ * The inquiry letter. Paper stays paper in both themes; a faint grain and a
+ * warm edge keep it from reading as a plain card.
+ */
+.letter {
+  --paper: #fbf8f1;
+  --paper-ink: #2a2723;
+  --paper-muted: #8a847a;
+  --paper-line: rgba(42, 39, 35, 0.16);
+}
+
+.paper {
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  color: var(--paper-ink);
+}
+
+.paper-edge {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 24px 60px -24px rgba(0, 0, 0, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Handwriting lines for the message. Line height and the gradient period must match. */
+.ruled {
+  line-height: 28px;
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, var(--paper-line) 27px, var(--paper-line) 28px);
+  background-attachment: local;
+}
+
+.letter input,
+.letter textarea {
+  color: var(--paper-ink);
+}
+
+.letter input::placeholder,
+.letter textarea::placeholder {
+  color: var(--paper-muted);
+}

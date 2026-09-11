@@ -22,6 +22,8 @@ export const site = {
   /** Google Analytics 4 measurement id; the tag is only rendered when set. */
   gaId: process.env.NEXT_PUBLIC_GA_ID,
   links: {
-    github: "https://github.com/rzkarsyad",
+    x: "https://x.com/arsatdesign",
+    linkedin: "https://www.linkedin.com/in/haloarsyad/",
+    contra: "https://contra.com/arsatdesign",
   },
 } as const;

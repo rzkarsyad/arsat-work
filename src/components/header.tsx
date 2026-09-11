@@ -1,11 +1,8 @@
 import Link from "next/link";
 import { site } from "@/lib/site";
-import { GitHub, Rss } from "./icons";
+import { Inquiry } from "./inquiry";
 import { NavLinks } from "./nav-links";
 import { ThemeToggle } from "./theme-toggle";
-
-const iconLink =
-  "flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-black/5 hover:text-ink dark:hover:bg-white/10";
 
 export function Header() {
   return (
@@ -16,13 +13,8 @@ export function Header() {
         </Link>
         <NavLinks />
       </div>
-      <nav aria-label="Site" className="flex items-center gap-0.5">
-        <a href={site.links.github} target="_blank" rel="noreferrer" aria-label="GitHub" className={iconLink}>
-          <GitHub />
-        </a>
-        <a href="/feed.xml" aria-label="RSS feed" className={iconLink}>
-          <Rss />
-        </a>
+      <nav aria-label="Site" className="flex items-center gap-1">
+        <Inquiry />
         <ThemeToggle />
       </nav>
     </header>
