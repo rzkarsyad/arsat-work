@@ -25,7 +25,7 @@ export function inquiryEmail({ name, email, message, sentAt = new Date() }: Inqu
   const text = [
     `Great, new inquiry!`,
     ``,
-    `${name} just sent you a letter from ${site.brand}.`,
+    `${name} just wrote you a letter.`,
     ``,
     `From:    ${name}`,
     `Email:   ${email}`,
@@ -45,7 +45,7 @@ export function inquiryEmail({ name, email, message, sentAt = new Date() }: Inqu
   <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
     <tr><td style="padding:0 8px 18px;">
       <h1 style="margin:0;font-size:26px;line-height:1.2;font-weight:600;letter-spacing:-0.3px;">Great, new inquiry! &#127881;</h1>
-      <p style="margin:8px 0 0;font-size:15px;line-height:1.5;color:#3d3a35;"><strong>${safe.name}</strong> just sent you a letter from ${escapeHtml(site.brand)}.</p>
+      <p style="margin:8px 0 0;font-size:15px;line-height:1.5;color:#3d3a35;"><strong>${safe.name}</strong> just wrote you a letter.</p>
     </td></tr>
     <tr><td style="background:#fbf8f1;border-radius:16px;padding:26px 28px;box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 12px 30px -18px rgba(0,0,0,.35);">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:14px;line-height:1.5;">
