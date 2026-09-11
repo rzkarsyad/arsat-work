@@ -1,5 +1,6 @@
 "use server";
 
+import { createHash } from "node:crypto";
 import { Resend } from "resend";
 import { inquiryEmail } from "@/lib/inquiry-email";
 import { site } from "@/lib/site";
@@ -38,12 +39,17 @@ export async function sendInquiry(_previous: InquiryState, formData: FormData): 
 
   const resend = new Resend(apiKey);
   const mail = inquiryEmail({ name, email, message });
-  const { error } = await resend.emails.send({
-    from: process.env.INQUIRY_FROM ?? `${site.brand} <onboarding@resend.dev>`,
-    to: [to],
-    replyTo: email,
-    ...mail,
-  });
+  // The same letter sent twice within a day (a retry, a double submit) is delivered once.
+  const idempotencyKey = `inquiry/${createHash("sha256").update(`${email}\n${name}\n${message}`).digest("hex").slice(0, 32)}`;
+  const { error } = await resend.emails.send(
+    {
+      from: process.env.INQUIRY_FROM ?? `${site.brand} <onboarding@resend.dev>`,
+      to: [to],
+      replyTo: email,
+      ...mail,
+    },
+    { idempotencyKey },
+  );
   if (error) {
     console.error("[inquiry] resend error", error);
     return fail("Couldn't send right now. Please try again in a moment.");
