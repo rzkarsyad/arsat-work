@@ -22,10 +22,9 @@ export function DesignGallery({ initialSlug }: { initialSlug?: string }) {
           className="object-cover"
         />
       )}
+      stageRatio={(design) => design.ratio}
       renderStage={(design) => (
-        <div className="absolute inset-5 sm:inset-7">
-          <Image src={design.image} alt={design.title} fill sizes="768px" priority className="object-contain" />
-        </div>
+        <Image src={design.image} alt={design.title} fill sizes="768px" priority className="object-cover" />
       )}
       renderMeta={(design) =>
         design.source ? (

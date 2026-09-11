@@ -26,8 +26,15 @@ type Props<T extends GalleryItem> = {
   older?: T;
   newer?: T;
   onClose: () => void;
-  onNavigate: (slug: string) => void;
+  /** `direction` is the way the content should slide: +1 towards newer, -1 towards older. */
+  onNavigate: (slug: string, direction: 1 | -1) => void;
   renderStage: (item: T, runKey: number) => React.ReactNode;
+  /**
+   * When given, the media area takes exactly this proportion and the panel
+   * hugs it, so the content reaches all four edges with no gap or letterbox.
+   * Without it the stage keeps the default 4:3 / 3:2 frame.
+   */
+  stageRatio?: (item: T) => number | undefined;
   /** Extra links after the date, e.g. Code or Source. */
   renderMeta?: (item: T) => React.ReactNode;
   /** Show a Reset control that remounts the stage. */
@@ -100,6 +107,7 @@ export function GalleryModal<T extends GalleryItem>({
   onNavigate,
   renderStage,
   renderMeta,
+  stageRatio,
   resettable = false,
 }: Props<T>) {
   const [run, setRun] = useState(0);
@@ -108,6 +116,7 @@ export function GalleryModal<T extends GalleryItem>({
   const closeButton = useRef<HTMLButtonElement>(null);
   /** False once the popup is closing: it must stop catching clicks meant for the grid. */
   const present = useIsPresent();
+  const ratio = stageRatio?.(item);
   const paragraphs =
     item.notes
       ?.split(/\n\s*\n/)
@@ -122,8 +131,8 @@ export function GalleryModal<T extends GalleryItem>({
     function onKeyDown(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       if (event.key === "Escape") onClose();
-      else if (event.key === "ArrowLeft" && older) onNavigate(older.slug);
-      else if (event.key === "ArrowRight" && newer) onNavigate(newer.slug);
+      else if (event.key === "ArrowLeft" && older) onNavigate(older.slug, -1);
+      else if (event.key === "ArrowRight" && newer) onNavigate(newer.slug, 1);
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -150,10 +159,20 @@ export function GalleryModal<T extends GalleryItem>({
         layoutId={`tile-${origin}`}
         layout
         transition={spring}
-        style={{ borderRadius: 28 }}
-        className="relative flex max-h-full w-full max-w-3xl flex-col overflow-hidden bg-surface shadow-[0_30px_90px_-20px_rgba(0,0,0,0.4)] ring-1 ring-line"
+        style={{
+          borderRadius: 28,
+          // A panel with its own stage ratio hugs the media, so a tall shot
+          // narrows the panel instead of growing past the viewport.
+          maxWidth: ratio ? `min(48rem, calc(72vh * ${ratio}))` : undefined,
+        }}
+        className={`relative flex max-h-full w-full flex-col overflow-hidden bg-surface shadow-[0_30px_90px_-20px_rgba(0,0,0,0.4)] ring-1 ring-line ${
+          ratio ? "" : "max-w-3xl"
+        }`}
       >
-        <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-stage sm:aspect-[3/2]">
+        <div
+          style={ratio ? { aspectRatio: ratio } : undefined}
+          className={`relative shrink-0 overflow-hidden bg-stage ${ratio ? "" : "aspect-[4/3] sm:aspect-[3/2]"}`}
+        >
           <AnimatePresence mode="popLayout" initial={false} custom={direction}>
             <motion.div
               key={item.slug}
@@ -210,10 +229,10 @@ export function GalleryModal<T extends GalleryItem>({
             </motion.div>
           </AnimatePresence>
           <div className="absolute right-5 top-4 flex gap-2 sm:right-7 sm:top-5">
-            <IconButton label={older ? `Older: ${older.title}` : "Nothing older"} onClick={() => older && onNavigate(older.slug)} disabled={!older}>
+            <IconButton label={older ? `Older: ${older.title}` : "Nothing older"} onClick={() => older && onNavigate(older.slug, -1)} disabled={!older}>
               <ArrowLeft size={15} />
             </IconButton>
-            <IconButton label={newer ? `Newer: ${newer.title}` : "Nothing newer"} onClick={() => newer && onNavigate(newer.slug)} disabled={!newer}>
+            <IconButton label={newer ? `Newer: ${newer.title}` : "Nothing newer"} onClick={() => newer && onNavigate(newer.slug, 1)} disabled={!newer}>
               <ArrowRight size={15} />
             </IconButton>
           </div>

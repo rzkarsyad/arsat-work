@@ -63,6 +63,8 @@ export type GalleryProps<T extends GalleryItem> = {
   renderTile: (item: T, index: number) => React.ReactNode;
   renderStage: (item: T, runKey: number) => React.ReactNode;
   renderMeta?: (item: T) => React.ReactNode;
+  /** Give the popup's media area the item's own proportion, edge to edge. */
+  stageRatio?: (item: T) => number | undefined;
   resettable?: boolean;
 };
 
@@ -79,6 +81,7 @@ export function Gallery<T extends GalleryItem>({
   renderTile,
   renderStage,
   renderMeta,
+  stageRatio,
   resettable,
 }: GalleryProps<T>) {
   const [tag, setTag] = useState<string | null>(null);
@@ -120,10 +123,8 @@ export function Gallery<T extends GalleryItem>({
     [basePath],
   );
 
-  function navigate(slug: string) {
-    const from = active ? getItem(active) : undefined;
-    const to = getItem(slug);
-    if (from && to) setDirection(to.number > from.number ? 1 : -1);
+  function navigate(slug: string, dir: 1 | -1) {
+    setDirection(dir);
     setActive(slug);
     window.history.replaceState({ item: slug }, "", itemUrl(slug));
   }
@@ -160,7 +161,14 @@ export function Gallery<T extends GalleryItem>({
 
   const entry = active ? getItem(active) : undefined;
   const activeIndex = active ? items.findIndex((item) => item.slug === active) : -1;
-  const neighbours = activeIndex >= 0 ? { newer: items[activeIndex - 1], older: items[activeIndex + 1] } : {};
+  /** The ends wrap, so the arrows never dead-end: past the newest comes the oldest. */
+  const neighbours =
+    activeIndex >= 0 && items.length > 1
+      ? {
+          newer: items[(activeIndex - 1 + items.length) % items.length],
+          older: items[(activeIndex + 1) % items.length],
+        }
+      : {};
   const visibleFor = (filter: string | null) => (filter ? items.filter((item) => item.tags.includes(filter)) : items);
   const visible = visibleFor(tag);
 
@@ -219,6 +227,7 @@ export function Gallery<T extends GalleryItem>({
             onNavigate={navigate}
             renderStage={renderStage}
             renderMeta={renderMeta}
+            stageRatio={stageRatio}
             resettable={resettable}
           />
         ) : null}
