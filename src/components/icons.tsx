@@ -107,12 +107,3 @@ export function Contra(props: IconProps) {
     </svg>
   );
 }
-
-export function Plane(props: IconProps) {
-  return (
-    <svg {...base(props)}>
-      <path d="M21 3 3 10.5l7.5 3L13.5 21 21 3Z" />
-      <path d="m10.5 13.5 10.5-10.5" />
-    </svg>
-  );
-}

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { site } from "@/lib/site";
-import { Inquiry } from "./inquiry";
 import { NavLinks } from "./nav-links";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -14,7 +13,6 @@ export function Header() {
         <NavLinks />
       </div>
       <nav aria-label="Site" className="flex items-center gap-1">
-        <Inquiry />
         <ThemeToggle />
       </nav>
     </header>
