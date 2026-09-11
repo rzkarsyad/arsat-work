@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { useDemo } from "@/lib/demo";
+import type { CraftProps } from "../types";
 
 type Mode = "idle" | "timer" | "music";
 const NEXT: Record<Mode, Mode> = { idle: "timer", timer: "music", music: "idle" };
@@ -59,8 +61,10 @@ function MusicBody() {
   );
 }
 
-export default function DynamicIsland() {
+export default function DynamicIsland({ demo }: CraftProps) {
   const [mode, setMode] = useState<Mode>("idle");
+
+  useDemo(!!demo, () => setMode((current) => NEXT[current]), { interval: 2600 });
   return (
     <div className="flex items-center justify-center p-2">
       <motion.button

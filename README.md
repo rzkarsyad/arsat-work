@@ -47,6 +47,12 @@ listed newest first. Tags come from the fixed list in
   with the craft; a click anywhere else on the tile opens the popup.
 - The site is set in Geist Sans only. Use `tabular-nums` for figures rather
   than a mono face.
+- Tiles demo themselves, like the looping videos on designspells. Your
+  component receives `demo`, true while it is on screen and nobody is hovering
+  it or has just touched it. Call `useDemo(!!demo, step, { interval })` from
+  `@/lib/demo` with a step that nudges the craft the way a visitor would, and
+  return a cleanup from the step if it starts a gesture that should be undone
+  when a real hand arrives.
 - Keep motion in [`motion`](https://motion.dev). `MotionConfig` already
   honours `prefers-reduced-motion` for the whole site, and `src/lib/motion.ts`
   has the shared spring.

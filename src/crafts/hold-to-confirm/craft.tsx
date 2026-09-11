@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { animate, AnimatePresence, motion, useMotionValue, useTransform } from "motion/react";
+import { useDemo } from "@/lib/demo";
+import type { CraftProps } from "../types";
 
 const HOLD_MS = 1100;
 const WIDTH = 220;
@@ -33,8 +35,12 @@ function Label({ phase }: { phase: Phase }) {
   );
 }
 
-export default function HoldToConfirm() {
+export default function HoldToConfirm({ demo }: CraftProps) {
   const [phase, setPhase] = useState<Phase>("idle");
+  const phaseRef = useRef<Phase>("idle");
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
   const progress = useMotionValue(0);
   const width = useTransform(progress, (v) => `${v * 100}%`);
   const controls = useRef<ReturnType<typeof animate> | null>(null);
@@ -51,7 +57,7 @@ export default function HoldToConfirm() {
   }
 
   function cancel() {
-    if (phase !== "holding") return;
+    if (phaseRef.current !== "holding") return;
     controls.current?.stop();
     controls.current = animate(progress, 0, { type: "spring", stiffness: 320, damping: 30 });
     setPhase("idle");
@@ -67,6 +73,15 @@ export default function HoldToConfirm() {
   }, [phase, progress]);
 
   useEffect(() => () => controls.current?.stop(), []);
+
+  useDemo(
+    !!demo,
+    () => {
+      start();
+      return cancel;
+    },
+    { interval: 4200, delay: 1200 },
+  );
 
   return (
     <motion.button

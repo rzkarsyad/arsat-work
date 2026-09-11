@@ -49,8 +49,14 @@ export type CraftMeta = {
 };
 
 export type CraftProps = {
-  /** True inside an index card, false on the detail page. */
+  /** True inside an index tile, false in the popup. */
   preview?: boolean;
+  /**
+   * True while the craft should demonstrate itself: it is on screen, nobody is
+   * hovering it or has just touched it, and the visitor has not asked for
+   * reduced motion. Pair it with `useDemo` from `@/lib/demo`.
+   */
+  demo?: boolean;
 };
 
 export type CraftComponent = ComponentType<CraftProps>;

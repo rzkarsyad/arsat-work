@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { useDemo } from "@/lib/demo";
 import type { CraftProps } from "../types";
 
 const DIGIT_HEIGHT = 44;
@@ -41,8 +42,10 @@ function Action({ children, onClick }: { children: React.ReactNode; onClick: () 
   );
 }
 
-export default function NumberTicker({ preview }: CraftProps) {
+export default function NumberTicker({ preview, demo }: CraftProps) {
   const [value, setValue] = useState(1024);
+
+  useDemo(!!demo, () => setValue(random(0, 999_999)), { interval: 2200 });
   const chars = value.toLocaleString("en-US").split("");
 
   return (

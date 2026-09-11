@@ -51,14 +51,25 @@ writeFileSync(
   join(dir, "craft.tsx"),
   `"use client";
 
+import { useState } from "react";
+import { useDemo } from "@/lib/demo";
 import type { CraftProps } from "../types";
 
-export default function ${componentName}({ preview }: CraftProps) {
+export default function ${componentName}({ preview, demo }: CraftProps) {
+  const [count, setCount] = useState(0);
+
+  // Self-demo: runs while the tile is on screen and nobody is interacting with it.
+  useDemo(!!demo, () => setCount((n) => n + 1), { interval: 2000 });
+
   return (
-    <div className="rounded-xl border border-line bg-surface px-5 py-4 text-sm text-ink">
-      ${title}
+    <button
+      type="button"
+      onClick={() => setCount((n) => n + 1)}
+      className="rounded-xl border border-line bg-surface px-5 py-4 text-sm text-ink"
+    >
+      ${title} · {count}
       {preview ? " (preview)" : null}
-    </div>
+    </button>
   );
 }
 `,

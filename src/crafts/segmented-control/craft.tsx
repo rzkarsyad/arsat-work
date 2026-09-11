@@ -2,13 +2,19 @@
 
 import { useId, useState } from "react";
 import { motion } from "motion/react";
+import { useDemo } from "@/lib/demo";
+import type { CraftProps } from "../types";
 
 const OPTIONS = ["Day", "Week", "Month", "Year"] as const;
 type Option = (typeof OPTIONS)[number];
 
-export default function SegmentedControl() {
+export default function SegmentedControl({ demo }: CraftProps) {
   const [value, setValue] = useState<Option>("Week");
   const id = useId();
+
+  useDemo(!!demo, () => setValue((current) => OPTIONS[(OPTIONS.indexOf(current) + 1) % OPTIONS.length]), {
+    interval: 1800,
+  });
 
   return (
     <div

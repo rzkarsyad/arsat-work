@@ -1,8 +1,11 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
-import { useInView } from "motion/react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useInView, useReducedMotion } from "motion/react";
 import { getCraft } from "@/crafts";
+
+/** How long after a touch or key press the self-demo stays paused. */
+const IDLE_MS = 4000;
 
 type Props = {
   slug: string;
@@ -59,18 +62,43 @@ function Fit({ children, padding }: { children: React.ReactNode; padding: number
 
 export function CraftStage({ slug, preview = false, eager = false, runKey = 0, padding = 20, className = "" }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "240px 0px" });
+  const seen = useInView(ref, { once: true, margin: "240px 0px" });
+  const onScreen = useInView(ref, { amount: 0.35 });
+  const reduceMotion = useReducedMotion();
+  const [hovered, setHovered] = useState(false);
+  const [idle, setIdle] = useState(true);
+  const idleTimer = useRef(0);
+
+  useEffect(() => () => window.clearTimeout(idleTimer.current), []);
+
+  /** A touch or key press hands the craft to the visitor for a while. */
+  function touched() {
+    setIdle(false);
+    window.clearTimeout(idleTimer.current);
+    idleTimer.current = window.setTimeout(() => setIdle(true), IDLE_MS);
+  }
+
   const craft = getCraft(slug);
   if (!craft) return null;
 
   const Component = craft.component;
-  const mounted = eager || inView;
+  const mounted = eager || seen;
+  const demo = mounted && onScreen && !reduceMotion && !hovered && idle;
 
   return (
-    <div ref={ref} className={`overflow-hidden bg-stage ${className}`}>
+    <div
+      ref={ref}
+      className={`overflow-hidden bg-stage ${className}`}
+      onPointerEnter={(event) => {
+        if (event.pointerType !== "touch") setHovered(true);
+      }}
+      onPointerLeave={() => setHovered(false)}
+      onPointerDownCapture={touched}
+      onKeyDownCapture={touched}
+    >
       {mounted ? (
         <Fit padding={padding}>
-          <Component key={runKey} preview={preview} />
+          <Component key={runKey} preview={preview} demo={demo} />
         </Fit>
       ) : null}
     </div>

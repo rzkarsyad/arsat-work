@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
+import { useDemo } from "@/lib/demo";
+import type { CraftProps } from "../types";
 
 const PHRASES = ["Design", "Prototype", "Iterate", "Ship it"];
 const GLYPHS = "!<>-_\\/[]{}—=+*^?#";
@@ -12,7 +14,7 @@ function randomGlyph() {
   return GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
 }
 
-export default function TextScramble() {
+export default function TextScramble({ demo }: CraftProps) {
   const [index, setIndex] = useState(0);
   const [text, setText] = useState(PHRASES[0]);
   const frame = useRef(0);
@@ -20,6 +22,8 @@ export default function TextScramble() {
   const reduceMotion = useReducedMotion();
 
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
+
+  useDemo(!!demo, advance, { interval: 2300 });
 
   function advance() {
     const nextIndex = (index + 1) % PHRASES.length;

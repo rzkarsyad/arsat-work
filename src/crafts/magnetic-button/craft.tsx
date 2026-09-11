@@ -2,11 +2,17 @@
 
 import { useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import { useDemo } from "@/lib/demo";
+import type { CraftProps } from "../types";
 
 const PULL = 0.35;
 const LABEL_PARALLAX = 0.4;
 
-export default function MagneticButton() {
+function between(min: number, max: number) {
+  return min + Math.random() * (max - min);
+}
+
+export default function MagneticButton({ demo }: CraftProps) {
   const ref = useRef<HTMLButtonElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -27,6 +33,20 @@ export default function MagneticButton() {
     x.set(0);
     y.set(0);
   }
+
+  useDemo(
+    !!demo,
+    () => {
+      x.set(between(-26, 26));
+      y.set(between(-16, 16));
+      const letGo = window.setTimeout(release, 800);
+      return () => {
+        window.clearTimeout(letGo);
+        release();
+      };
+    },
+    { interval: 2100 },
+  );
 
   return (
     <div
