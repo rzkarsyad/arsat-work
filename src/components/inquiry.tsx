@@ -7,21 +7,6 @@ import { foldAndFly } from "@/lib/paper-plane";
 import { site } from "@/lib/site";
 import { Close, Plane } from "./icons";
 
-function Stamp() {
-  return (
-    <div className="flex items-start gap-2">
-      <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden className="text-[#2a2723]/40">
-        <circle cx="23" cy="23" r="21" fill="none" stroke="currentColor" strokeWidth="1.2" />
-        <circle cx="23" cy="23" r="16.5" fill="none" stroke="currentColor" strokeWidth="1" />
-        <path d="M22 17c6-4 12-4 18 0M22 23c6-4 12-4 18 0M22 29c6-4 12-4 18 0" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-      </svg>
-      <div className="flex h-[52px] w-[50px] items-center justify-center bg-white text-[8px] font-semibold tracking-tight text-[#2a2723] outline outline-[3px] outline-offset-[-3px] outline-dashed outline-[#fbf8f1] ring-1 ring-[#2a2723]/15">
-        {site.brand}
-      </div>
-    </div>
-  );
-}
-
 const field =
   "w-full border-0 border-b border-(--paper-line) bg-transparent px-0 py-1.5 text-[15px] outline-none focus-visible:outline-none focus:border-(--paper-ink)";
 
@@ -48,10 +33,9 @@ function Letter({ onSent, onClose }: { onSent: () => void; onClose: () => void }
     (async () => {
       try {
         if (!reduceMotion) {
-          // Seal: the writing fades and the postmark lands.
-          await animate("[data-part=fields]", { opacity: 0, y: -4 }, { duration: 0.22 });
-          await animate("[data-part=postmark]", { opacity: [0, 1], scale: [1.7, 1], rotate: [-4, -14] }, { duration: 0.32, ease: [0.2, 0.9, 0.3, 1.15] });
-          await new Promise((r) => setTimeout(r, 320));
+          // The writing lifts off the page before it folds.
+          await animate("[data-part=fields]", { opacity: 0, y: -4 }, { duration: 0.24 });
+          await new Promise((r) => setTimeout(r, 180));
         }
         if (stage.current && sheet.current) await foldAndFly(stage.current, sheet.current, { reduceMotion: !!reduceMotion });
       } catch (error) {
@@ -80,25 +64,12 @@ function Letter({ onSent, onClose }: { onSent: () => void; onClose: () => void }
         className="letter relative"
       >
         {/* The sheet. Its clones are what fold; the writing sits on top. */}
-        <div ref={sheet} data-part="sheet" className="paper paper-edge pointer-events-none absolute inset-0 rounded-[10px]">
-          <div className="absolute right-5 top-5">
-            <Stamp />
-          </div>
-          <div
-            data-part="postmark"
-            className="absolute right-[62px] top-[18px] flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#b23a2a]/70 text-center text-[8px] font-semibold uppercase leading-tight tracking-wider text-[#b23a2a]/80 opacity-0"
-            style={{ rotate: "-14deg" }}
-          >
-            sent
-            <br />
-            with care
-          </div>
-        </div>
+        <div ref={sheet} data-part="sheet" className="paper paper-edge pointer-events-none absolute inset-0 rounded-[10px]" />
         {/* Where the folding and the flight happen, in front of the sheet. */}
         <div ref={stage} data-part="stage" className="pointer-events-none absolute inset-0 z-20 text-canvas" style={{ perspective: 1400, transformStyle: "preserve-3d" }} />
 
         <form action={formAction} data-part="fields" className="relative z-10 px-7 pb-7 pt-6 text-[var(--paper-ink)]" aria-busy={pending}>
-          <div className="pr-28">
+          <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--paper-muted)]">To</p>
             <p className="mt-0.5 text-[15px] font-medium">{site.author}</p>
           </div>
