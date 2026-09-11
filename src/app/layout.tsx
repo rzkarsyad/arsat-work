@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { Analytics } from "@vercel/analytics/next";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
@@ -33,6 +32,18 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} h-full antialiased`}>
+      {site.gaId ? (
+        <head>
+          {/* Google's standard gtag snippet, rendered statically in <head> so Search Console's
+              Google Analytics verification can find it. Only present in production. */}
+          <script async src={`https://www.googletagmanager.com/gtag/js?id=${site.gaId}`} />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${site.gaId}');`,
+            }}
+          />
+        </head>
+      ) : null}
       <body className="flex min-h-full flex-col bg-canvas text-ink">
         <Providers>
           <Header />
@@ -40,7 +51,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
         </Providers>
         <Analytics />
-        {site.gaId ? <GoogleAnalytics gaId={site.gaId} /> : null}
       </body>
     </html>
   );
