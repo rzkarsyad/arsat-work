@@ -38,8 +38,7 @@ export function OgFrame({ eyebrow, title, footer }: { eyebrow?: string; title: s
     >
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
         <div style={{ width: 20, height: 20, borderRadius: 999, background: ACCENT }} />
-        <div style={{ display: "flex", fontSize: 30, fontWeight: 500, letterSpacing: -0.5 }}>Craft</div>
-        <div style={{ display: "flex", fontSize: 26, color: MUTED }}>{`by ${site.author}`}</div>
+        <div style={{ display: "flex", fontSize: 30, fontWeight: 500, letterSpacing: -0.5 }}>{site.brand}</div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         {eyebrow ? <div style={{ display: "flex", fontSize: 24, color: MUTED }}>{eyebrow}</div> : null}

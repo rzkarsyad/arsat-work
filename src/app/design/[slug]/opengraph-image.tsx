@@ -42,8 +42,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: landscape ? 420 : 560, padding: "56px 48px 56px 64px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 18, height: 18, borderRadius: 999, background: "#e4552b" }} />
-            <div style={{ display: "flex", fontSize: 26, fontWeight: 500 }}>Craft</div>
-            <div style={{ display: "flex", fontSize: 22, color: "#6b6862" }}>{`by ${site.author}`}</div>
+            <div style={{ display: "flex", fontSize: 26, fontWeight: 500 }}>{site.brand}</div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div style={{ display: "flex", fontSize: 20, color: "#6b6862" }}>UI design</div>

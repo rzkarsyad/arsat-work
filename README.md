@@ -1,4 +1,4 @@
-# Craft by Arsat
+# arsat.work
 
 A personal experiment place. Every exploration is a small React component that
 runs **live** on the page — no screen recordings, no CMS, no database. Content
@@ -106,3 +106,4 @@ Both are optional and only affect links.
 | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Canonical origin for RSS, sitemap and Open Graph. Falls back to the Vercel deployment URL. |
 | `NEXT_PUBLIC_REPO_URL` | Enables the footer "Source" link and the per-craft "Code" link. They are hidden when it is unset. |
+| `NEXT_PUBLIC_GA_ID` | Google Analytics 4 measurement id. The tag renders only when it is set (production on Vercel). |
