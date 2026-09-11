@@ -114,6 +114,7 @@ export function GalleryModal<T extends GalleryItem>({
   /** The tile this popup grew out of. It shrinks back into that tile on close, wherever you navigated. */
   const [origin] = useState(item.slug);
   const closeButton = useRef<HTMLButtonElement>(null);
+  const scroller = useRef<HTMLDivElement>(null);
   /** False once the popup is closing: it must stop catching clicks meant for the grid. */
   const present = useIsPresent();
   const ratio = stageRatio?.(item);
@@ -126,6 +127,11 @@ export function GalleryModal<T extends GalleryItem>({
   useEffect(() => {
     closeButton.current?.focus({ preventScroll: true });
   }, []);
+
+  /** A new item starts at the top rather than inheriting the last one's scroll. */
+  useEffect(() => {
+    scroller.current?.scrollTo({ top: 0 });
+  }, [item.slug]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -169,73 +175,62 @@ export function GalleryModal<T extends GalleryItem>({
           ratio ? "" : "max-w-3xl"
         }`}
       >
-        <div
-          style={ratio ? { aspectRatio: ratio } : undefined}
-          className={`relative shrink-0 overflow-hidden bg-stage ${ratio ? "" : "aspect-[4/3] sm:aspect-[3/2]"}`}
-        >
+        <div ref={scroller} className="relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
           <AnimatePresence mode="popLayout" initial={false} custom={direction}>
             <motion.div
               key={item.slug}
-              data-slide="stage"
+              data-slide="content"
               custom={direction}
               variants={slide}
               initial="enter"
               animate="center"
               exit="exit"
-              className="absolute inset-0"
             >
-              {renderStage(item, run)}
+              <div
+                style={ratio ? { aspectRatio: ratio } : undefined}
+                className={`relative shrink-0 overflow-hidden bg-stage ${ratio ? "" : "aspect-[4/3] sm:aspect-[3/2]"}`}
+              >
+                {renderStage(item, run)}
+              </div>
+              <div className="px-5 pb-16 pt-4 sm:px-7 sm:pb-16 sm:pt-5">
+                <h2 id={`item-title-${item.slug}`} className="text-xl font-medium tracking-tight text-ink sm:text-2xl">
+                  {item.title}
+                </h2>
+                <p className="mt-1 text-[15px] leading-relaxed text-muted">{item.description}</p>
+                {paragraphs.length ? (
+                  <div className="mt-5 flex max-w-prose flex-col gap-3 text-[15px] leading-relaxed text-ink/85">
+                    {paragraphs.map((paragraph) => (
+                      <p key={paragraph.slice(0, 32)}>{paragraph}</p>
+                    ))}
+                  </div>
+                ) : null}
+                <p className="mt-6 flex flex-wrap items-center gap-x-3 text-[13px] text-muted">
+                  <time dateTime={item.date}>{formatDate(item.date)}</time>
+                  {renderMeta?.(item)}
+                </p>
+              </div>
             </motion.div>
           </AnimatePresence>
-          <div className="absolute right-3 top-3 flex gap-2">
-            {resettable ? (
-              <IconButton label="Reset" onClick={() => setRun((n) => n + 1)}>
-                <Reset size={15} />
-              </IconButton>
-            ) : null}
-            <IconButton ref={closeButton} label="Close" onClick={onClose}>
-              <Close size={15} />
-            </IconButton>
-          </div>
         </div>
 
-        <div className="relative overflow-y-auto overflow-x-hidden">
-          <AnimatePresence mode="popLayout" initial={false} custom={direction}>
-            <motion.div
-              key={item.slug}
-              data-slide="text"
-              custom={direction}
-              variants={slide}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              className="px-5 pb-5 pr-28 pt-4 sm:px-7 sm:pb-7 sm:pr-32 sm:pt-5"
-            >
-              <h2 id={`item-title-${item.slug}`} className="text-xl font-medium tracking-tight text-ink sm:text-2xl">
-                {item.title}
-              </h2>
-              <p className="mt-1 text-[15px] leading-relaxed text-muted">{item.description}</p>
-              {paragraphs.length ? (
-                <div className="mt-5 flex max-w-prose flex-col gap-3 text-[15px] leading-relaxed text-ink/85">
-                  {paragraphs.map((paragraph) => (
-                    <p key={paragraph.slice(0, 32)}>{paragraph}</p>
-                  ))}
-                </div>
-              ) : null}
-              <p className="mt-6 flex flex-wrap items-center gap-x-3 text-[13px] text-muted">
-                <time dateTime={item.date}>{formatDate(item.date)}</time>
-                {renderMeta?.(item)}
-              </p>
-            </motion.div>
-          </AnimatePresence>
-          <div className="absolute right-5 top-4 flex gap-2 sm:right-7 sm:top-5">
-            <IconButton label={older ? `Older: ${older.title}` : "Nothing older"} onClick={() => older && onNavigate(older.slug, -1)} disabled={!older}>
-              <ArrowLeft size={15} />
+        {/* Controls float over the panel, so scrolling never takes them away. */}
+        <div className="absolute right-3 top-3 z-10 flex gap-2">
+          {resettable ? (
+            <IconButton label="Reset" onClick={() => setRun((n) => n + 1)}>
+              <Reset size={15} />
             </IconButton>
-            <IconButton label={newer ? `Newer: ${newer.title}` : "Nothing newer"} onClick={() => newer && onNavigate(newer.slug, 1)} disabled={!newer}>
-              <ArrowRight size={15} />
-            </IconButton>
-          </div>
+          ) : null}
+          <IconButton ref={closeButton} label="Close" onClick={onClose}>
+            <Close size={15} />
+          </IconButton>
+        </div>
+        <div className="absolute bottom-4 right-4 z-10 flex gap-2">
+          <IconButton label={older ? `Older: ${older.title}` : "Nothing older"} onClick={() => older && onNavigate(older.slug, -1)} disabled={!older}>
+            <ArrowLeft size={15} />
+          </IconButton>
+          <IconButton label={newer ? `Newer: ${newer.title}` : "Nothing newer"} onClick={() => newer && onNavigate(newer.slug, 1)} disabled={!newer}>
+            <ArrowRight size={15} />
+          </IconButton>
         </div>
       </motion.div>
     </div>
