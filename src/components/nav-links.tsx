@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/", label: "Crafts", match: (path: string) => !path.startsWith("/design") },
+  { href: "/", label: "Crafts", match: (path: string) => !path.startsWith("/design") && !path.startsWith("/about") },
   { href: "/design", label: "Design", match: (path: string) => path.startsWith("/design") },
+  { href: "/about", label: "About", match: (path: string) => path.startsWith("/about") },
 ];
 
 export function NavLinks() {

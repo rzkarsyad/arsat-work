@@ -49,6 +49,12 @@ proportion) and fill in the title, description, date and tags. It appears on
 `/design` and at `/design/my-screen`. Because the image is imported, its size
 is known at build time and the grid never jumps.
 
+## Editing the About page
+
+`/about` is plain content: the copy lives in `src/components/about.tsx`, and
+the role, location and social links it shows come from `src/lib/site.ts`.
+Its share image is `src/app/about/opengraph-image.tsx`.
+
 ## Writing a craft
 
 - Use the theme tokens, not raw colours: `bg-surface`, `text-ink`,
