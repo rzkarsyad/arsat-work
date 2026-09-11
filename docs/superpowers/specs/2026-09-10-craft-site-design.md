@@ -113,3 +113,11 @@ The gallery, tile and popup were generalised (`Gallery`, `GalleryTile`,
 and the Code link, designs get an optional Open link. Feed and sitemap cover
 both. Three sample shots rendered from mockups seed the section until Arsat
 replaces them.
+
+## Revision — 2026-09-11, arsat.work
+
+The site now lives at https://arsat.work with the brand `arsat.work` and the
+metadata name "Rizki Arsyad - Product Designer". Google Analytics 4 runs in
+production only. The Vercel project, GitHub repository and local folder were
+renamed from `craft-by-arsat` to `arsat-work`; `www` redirects to the bare
+domain.
