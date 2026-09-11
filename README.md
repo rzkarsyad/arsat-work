@@ -55,6 +55,18 @@ is known at build time and the grid never jumps.
 the role, location and social links it shows come from `src/lib/site.ts`.
 Its share image is `src/app/about/opengraph-image.tsx`.
 
+## Contact form
+
+"Get in touch" in the header opens a plain dialog (`src/components/contact.tsx`)
+that posts to the `sendInquiry` Server Action (`src/app/actions/inquiry.ts`).
+The note is delivered through Resend with the template in
+`src/lib/inquiry-email.ts` and the writer's address as reply-to.
+
+Environment: `RESEND_API_KEY` (from the Vercel Marketplace integration),
+`INQUIRY_TO` (recipient) and `INQUIRY_FROM` (display name and address on the
+verified domain). Without a key and recipient the form says sending isn't set
+up. Locally, `INQUIRY_DRY_RUN=1 npm run dev` accepts notes without sending.
+
 ## Writing a craft
 
 - Use the theme tokens, not raw colours: `bg-surface`, `text-ink`,

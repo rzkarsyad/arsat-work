@@ -13,10 +13,10 @@ const LIMIT = { name: 80, email: 254, message: 2000 };
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * Delivers an inquiry through Resend with the writer as reply-to. There is no
- * UI wired to this at the moment; the next contact idea should call it via
- * `useActionState(sendInquiry, null)` with fields name, email, message (and
- * an untouched honeypot input named "company").
+ * Delivers an inquiry through Resend with the writer as reply-to. Called from
+ * the "Get in touch" dialog (`src/components/contact.tsx`) via
+ * `useActionState(sendInquiry, null)` with fields name, email, message and an
+ * untouched honeypot input named "company".
  */
 export async function sendInquiry(_previous: InquiryState, formData: FormData): Promise<InquiryState> {
   const field = (name: string) => String(formData.get(name) ?? "").trim();
