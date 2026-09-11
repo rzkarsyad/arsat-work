@@ -3,20 +3,9 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useAnimate, useReducedMotion } from "motion/react";
 import { sendInquiry, type InquiryState } from "@/app/actions/inquiry";
+import { foldAndFly } from "@/lib/paper-plane";
 import { site } from "@/lib/site";
 import { Close, Plane } from "./icons";
-
-/** A paper plane, drawn as two wings so it reads as folded paper rather than an icon. */
-function PaperPlane({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 120 80" width="120" height="80" className={className} aria-hidden>
-      <path d="M2 34 118 4 74 78 56 50 2 34Z" fill="#f4efe4" />
-      <path d="M56 50 118 4 74 78 56 50Z" fill="#dcd5c6" />
-      <path d="M2 34 118 4 56 50 2 34Z" fill="#fbf8f1" />
-      <path d="M56 50 118 4" stroke="#b9b1a2" strokeWidth="1" />
-    </svg>
-  );
-}
 
 function Stamp() {
   return (
@@ -50,43 +39,21 @@ function Letter({ onSent, onClose }: { onSent: () => void; onClose: () => void }
     first.current?.focus({ preventScroll: true });
   }, []);
 
+  const stage = useRef<HTMLDivElement>(null);
+  const sheet = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!state || state.ok !== true) return;
     let cancelled = false;
     (async () => {
       try {
-      if (reduceMotion) {
-        await animate(scope.current, { opacity: 0 }, { duration: 0.3 });
-        if (!cancelled) onSent();
-        return;
-      }
-      // Seal: the writing fades and the postmark lands. The single sheet gives way
-      // to the three fold panels underneath it at the same moment.
-      await animate("[data-part=fields]", { opacity: 0, y: -4 }, { duration: 0.22 });
-      await Promise.all([
-        animate("[data-part=sheet]", { opacity: 0 }, { duration: 0.05 }),
-        animate("[data-part=panel]", { opacity: 1 }, { duration: 0.05 }),
-      ]);
-      await animate("[data-part=postmark]", { opacity: [0, 1], scale: [1.7, 1], rotate: [-4, -14] }, { duration: 0.32, ease: [0.2, 0.9, 0.3, 1.15] });
-      await new Promise((r) => setTimeout(r, 260));
-      // Fold: top half down over the bottom, then the right half over the left.
-      await animate("[data-part=fold-top]", { rotateX: -180 }, { duration: 0.55, ease: [0.55, 0, 0.25, 1] });
-      await animate("[data-part=fold-right]", { rotateY: -180 }, { duration: 0.5, ease: [0.55, 0, 0.25, 1] });
-      await new Promise((r) => setTimeout(r, 120));
-      // The folded square becomes a plane.
-      await Promise.all([
-        animate("[data-part=panel]", { opacity: 0, scale: 0.85 }, { duration: 0.22 }),
-        animate("[data-part=plane]", { opacity: 1, scale: 1 }, { duration: 0.28, ease: "easeOut" }),
-      ]);
-      // And flies.
-      await Promise.all([
-        animate(
-          "[data-part=plane]",
-          { x: [0, 90, 720], y: [0, -70, -520], rotate: [-22, -30, -38], scale: [1, 1.08, 0.3], opacity: [1, 1, 0] },
-          { duration: 1.15, ease: [0.45, 0, 0.85, 0.35] },
-        ),
-        animate("[data-part=trail]", { pathLength: [0, 1], opacity: [0.7, 0.7, 0] }, { duration: 1.15, ease: [0.45, 0, 0.85, 0.35] }),
-      ]);
+        if (!reduceMotion) {
+          // Seal: the writing fades and the postmark lands.
+          await animate("[data-part=fields]", { opacity: 0, y: -4 }, { duration: 0.22 });
+          await animate("[data-part=postmark]", { opacity: [0, 1], scale: [1.7, 1], rotate: [-4, -14] }, { duration: 0.32, ease: [0.2, 0.9, 0.3, 1.15] });
+          await new Promise((r) => setTimeout(r, 320));
+        }
+        if (stage.current && sheet.current) await foldAndFly(stage.current, sheet.current, { reduceMotion: !!reduceMotion });
       } catch (error) {
         // The letter was accepted; a hiccup in the flourish must not strand it.
         console.error("[inquiry] send animation failed", error);
@@ -96,74 +63,39 @@ function Letter({ onSent, onClose }: { onSent: () => void; onClose: () => void }
     return () => {
       cancelled = true;
     };
-  }, [state, animate, scope, onSent, reduceMotion]);
+  }, [state, animate, onSent, reduceMotion]);
 
   useEffect(() => {
     if (state && state.ok === false) animate(scope.current, { x: [0, -7, 7, -5, 5, 0] }, { duration: 0.4 });
   }, [state, animate, scope]);
 
-  const panel = "absolute paper";
   return (
-    <div style={{ perspective: 1400 }} className="w-full max-w-[420px]">
+    <div className="w-full max-w-[420px]" style={{ perspective: 1400 }}>
       <motion.div
         ref={scope}
-        initial={{ opacity: 0, y: 28, rotate: -1.5, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
+        initial={{ opacity: 0, y: 56, rotateX: 18, rotate: -1.5, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, rotateX: 0, rotate: 0, scale: 1 }}
         exit={{ opacity: 0, y: 16, scale: 0.98, transition: { duration: 0.18 } }}
-        transition={{ type: "spring", visualDuration: 0.5, bounce: 0.18 }}
+        transition={{ type: "spring", visualDuration: 0.62, bounce: 0.16 }}
         className="letter relative"
       >
-        {/* At rest the paper is one sheet. */}
-        <div data-part="sheet" className="paper paper-edge pointer-events-none absolute inset-0 rounded-[10px]">
+        {/* The sheet. Its clones are what fold; the writing sits on top. */}
+        <div ref={sheet} data-part="sheet" className="paper paper-edge pointer-events-none absolute inset-0 rounded-[10px]">
           <div className="absolute right-5 top-5">
             <Stamp />
           </div>
-        </div>
-        {/* For the fold it is three panels in their own 3D space, revealed only then. */}
-        <div data-part="panel" className="pointer-events-none absolute inset-0 opacity-0" style={{ perspective: 1400, transformStyle: "preserve-3d" }}>
           <div
-            data-part="fold-top"
-            className={`${panel} paper-edge inset-x-0 top-0 h-1/2 rounded-t-[10px]`}
-            style={{ transformOrigin: "50% 100%", backfaceVisibility: "visible", transform: "translateZ(1px)" }}
+            data-part="postmark"
+            className="absolute right-[62px] top-[18px] flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#b23a2a]/70 text-center text-[8px] font-semibold uppercase leading-tight tracking-wider text-[#b23a2a]/80 opacity-0"
+            style={{ rotate: "-14deg" }}
           >
-            <div className="absolute right-5 top-5">
-              <Stamp />
-            </div>
-            <div
-              data-part="postmark"
-              className="absolute right-[62px] top-[18px] flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#b23a2a]/70 text-center text-[8px] font-semibold uppercase leading-tight tracking-wider text-[#b23a2a]/80 opacity-0"
-              style={{ rotate: "-14deg" }}
-            >
-              sent
-              <br />
-              with care
-            </div>
+            sent
+            <br />
+            with care
           </div>
-          <div data-part="fold-left" className={`${panel} paper-edge bottom-0 left-0 h-1/2 w-1/2 rounded-bl-[10px]`} />
-          <div
-            data-part="fold-right"
-            className={`${panel} paper-edge bottom-0 right-0 h-1/2 w-1/2 rounded-br-[10px]`}
-            style={{ transformOrigin: "0% 50%", backfaceVisibility: "visible", transform: "translateZ(1px)" }}
-          />
         </div>
-
-        {/* Flight path, drawn from where the folded square ends up. */}
-        <svg data-part="trail-svg" className="pointer-events-none absolute left-1/4 top-3/4 z-20 overflow-visible" width="1" height="1" aria-hidden>
-          <motion.path
-            data-part="trail"
-            d="M0 0 C 120 -40, 260 -240, 720 -520"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeDasharray="6 8"
-            strokeLinecap="round"
-            className="text-canvas/70"
-            initial={{ pathLength: 0, opacity: 0 }}
-          />
-        </svg>
-        <div data-part="plane" className="pointer-events-none absolute left-1/4 top-3/4 z-20 -translate-x-1/2 -translate-y-1/2 opacity-0" style={{ scale: "0.6", rotate: "-22deg", filter: "drop-shadow(0 12px 16px rgba(0,0,0,0.25))" }}>
-          <PaperPlane />
-        </div>
+        {/* Where the folding and the flight happen, in front of the sheet. */}
+        <div ref={stage} data-part="stage" className="pointer-events-none absolute inset-0 z-20 text-canvas" style={{ perspective: 1400, transformStyle: "preserve-3d" }} />
 
         <form action={formAction} data-part="fields" className="relative z-10 px-7 pb-7 pt-6 text-[var(--paper-ink)]" aria-busy={pending}>
           <div className="pr-28">
