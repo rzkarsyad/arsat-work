@@ -22,7 +22,8 @@ That scaffolds `src/crafts/my-idea/` with two files:
   card than on its own page.
 
 Edit both, and it appears on the index as a live tile; clicking the tile opens
-it in a popup at `/my-idea`, which is also a shareable link. Push, and Vercel
+it in a popup at `/my-idea`, which is also a shareable link. Inside the popup,
+← and → slide between crafts. Push, and Vercel
 deploys it.
 
 The index registry (`src/crafts/_metas.ts` and `_registry.ts`) is generated

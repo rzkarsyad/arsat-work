@@ -8,18 +8,22 @@ import { spring } from "@/lib/motion";
 import { CraftModal } from "./craft-modal";
 import { CraftTile } from "./craft-tile";
 
+const titleCase = (label: string) => label.charAt(0).toUpperCase() + label.slice(1);
+
 function Chip({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
   return (
     <button
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`relative shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] transition-colors ${
-        active ? "text-canvas" : "text-muted hover:text-ink"
+      className={`relative shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] transition-colors ${
+        active
+          ? "text-canvas"
+          : "bg-black/[0.045] text-muted hover:bg-black/[0.075] hover:text-ink dark:bg-white/[0.07] dark:hover:bg-white/[0.11]"
       }`}
     >
       {active ? <motion.span layoutId="active-chip" className="absolute inset-0 rounded-full bg-ink" transition={spring} /> : null}
-      <span className="relative">{label}</span>
+      <span className="relative">{titleCase(label)}</span>
     </button>
   );
 }
@@ -66,6 +70,15 @@ export function Gallery({ initialSlug }: { initialSlug?: string }) {
    */
   const [generation, setGeneration] = useState<Record<string, number>>({});
   const [active, setActive] = useState<string | null>(initialSlug ?? null);
+  /** Which way the popup's content slides on the next navigation. */
+  const [direction, setDirection] = useState<1 | -1>(1);
+  /**
+   * Bumped on every open, never on navigation. It keys the popup, so moving
+   * between crafts slides content inside one panel, while opening again
+   * right after closing mounts a fresh popup that morphs out of its own tile
+   * instead of reviving the one still on its way out.
+   */
+  const [session, setSession] = useState(0);
   const grid = useRef<HTMLDivElement>(null);
   const metrics = useGridMetrics(grid);
   /** Whether the open popup pushed a history entry, so closing can pop it. */
@@ -73,14 +86,18 @@ export function Gallery({ initialSlug }: { initialSlug?: string }) {
 
   const open = useCallback((slug: string) => {
     pushed.current = true;
+    setSession((current) => current + 1);
     setActive(slug);
     window.history.pushState({ craft: slug }, "", `/${slug}`);
   }, []);
 
-  const navigate = useCallback((slug: string) => {
+  function navigate(slug: string) {
+    const from = active ? getEntry(active) : undefined;
+    const to = getEntry(slug);
+    if (from && to) setDirection(to.number > from.number ? 1 : -1);
     setActive(slug);
     window.history.replaceState({ craft: slug }, "", `/${slug}`);
-  }, []);
+  }
 
   const close = useCallback(() => {
     setActive(null);
@@ -135,7 +152,7 @@ export function Gallery({ initialSlug }: { initialSlug?: string }) {
       <div
         role="group"
         aria-label="Filter by tag"
-        className="-mx-4 mt-4 flex gap-0.5 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:mt-6 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden"
+        className="-mx-4 mt-4 flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:mt-6 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden"
       >
         <Chip active={tag === null} label="All" onClick={() => selectTag(null)} />
         {tagCounts().map(({ tag: t }) => (
@@ -158,8 +175,9 @@ export function Gallery({ initialSlug }: { initialSlug?: string }) {
       <AnimatePresence>
         {entry ? (
           <CraftModal
-            key={entry.slug}
+            key={`popup-${session}`}
             craft={entry}
+            direction={direction}
             older={neighbours.older}
             newer={neighbours.newer}
             onClose={close}

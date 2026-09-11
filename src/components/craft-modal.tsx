@@ -1,20 +1,51 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useIsPresent } from "motion/react";
+import { AnimatePresence, motion, useIsPresent, type Variants } from "motion/react";
 import type { CraftEntry } from "@/crafts/types";
 import { formatDate } from "@/lib/format";
-import { blurIn, spring } from "@/lib/motion";
+import { spring } from "@/lib/motion";
 import { site } from "@/lib/site";
 import { CraftStage } from "./craft-stage";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Close, Reset } from "./icons";
 
 type Props = {
   craft: CraftEntry;
+  /** +1 when moving to a newer craft, -1 to an older one. Sets the slide direction. */
+  direction: 1 | -1;
   older?: CraftEntry;
   newer?: CraftEntry;
   onClose: () => void;
   onNavigate: (slug: string) => void;
+};
+
+/**
+ * Moving between crafts slides the content sideways inside the panel, the
+ * way a pager does: the new craft enters from the side you are heading to
+ * while the old one leaves the other way, both with a short blur.
+ */
+const slide: Variants = {
+  enter: (direction: number) => ({ x: direction * 72, opacity: 0, filter: "blur(10px)" }),
+  center: {
+    x: 0,
+    opacity: 1,
+    filter: "blur(0px)",
+    transition: {
+      x: { type: "spring", visualDuration: 0.42, bounce: 0 },
+      opacity: { duration: 0.28 },
+      filter: { duration: 0.32 },
+    },
+  },
+  exit: (direction: number) => ({
+    x: direction * -72,
+    opacity: 0,
+    filter: "blur(10px)",
+    transition: {
+      x: { type: "spring", visualDuration: 0.36, bounce: 0 },
+      opacity: { duration: 0.2 },
+      filter: { duration: 0.2 },
+    },
+  }),
 };
 
 function IconButton({
@@ -45,8 +76,10 @@ function IconButton({
   );
 }
 
-export function CraftModal({ craft, older, newer, onClose, onNavigate }: Props) {
+export function CraftModal({ craft, direction, older, newer, onClose, onNavigate }: Props) {
   const [run, setRun] = useState(0);
+  /** The tile this popup grew out of. It shrinks back into that tile on close, wherever you navigated. */
+  const [origin] = useState(craft.slug);
   const closeButton = useRef<HTMLButtonElement>(null);
   /** False once the popup is closing: it must stop catching clicks meant for the grid. */
   const present = useIsPresent();
@@ -89,13 +122,27 @@ export function CraftModal({ craft, older, newer, onClose, onNavigate }: Props) 
         className="absolute inset-0 bg-black/30 backdrop-blur-xl dark:bg-black/60"
       />
       <motion.div
-        layoutId={`craft-${craft.slug}`}
+        layoutId={`craft-${origin}`}
+        layout
         transition={spring}
         style={{ borderRadius: 28 }}
         className="relative flex max-h-full w-full max-w-3xl flex-col overflow-hidden bg-surface shadow-[0_30px_90px_-20px_rgba(0,0,0,0.4)] ring-1 ring-line"
       >
-        <div className="relative aspect-[4/3] shrink-0 sm:aspect-[3/2]">
-          <CraftStage slug={craft.slug} eager runKey={run} padding={32} className="absolute inset-0" />
+        <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-stage sm:aspect-[3/2]">
+          <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+            <motion.div
+              key={craft.slug}
+              data-slide="stage"
+              custom={direction}
+              variants={slide}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="absolute inset-0"
+            >
+              <CraftStage slug={craft.slug} eager runKey={run} padding={32} className="absolute inset-0" />
+            </motion.div>
+          </AnimatePresence>
           <div className="absolute right-3 top-3 flex gap-2">
             <IconButton label="Reset" onClick={() => setRun((n) => n + 1)}>
               <Reset size={15} />
@@ -106,45 +153,54 @@ export function CraftModal({ craft, older, newer, onClose, onNavigate }: Props) 
           </div>
         </div>
 
-        <motion.div {...blurIn} className="overflow-y-auto px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5">
-          <div className="flex items-start justify-between gap-5">
-            <div className="min-w-0">
+        <div className="relative overflow-y-auto overflow-x-hidden">
+          <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+            <motion.div
+              key={craft.slug}
+              data-slide="text"
+              custom={direction}
+              variants={slide}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="px-5 pb-5 pr-28 pt-4 sm:px-7 sm:pb-7 sm:pr-32 sm:pt-5"
+            >
               <h2 id={`craft-title-${craft.slug}`} className="text-xl font-medium tracking-tight text-ink sm:text-2xl">
                 {craft.title}
               </h2>
               <p className="mt-1 text-[15px] leading-relaxed text-muted">{craft.description}</p>
-            </div>
-            <div className="flex shrink-0 gap-2">
-              <IconButton label={older ? `Older: ${older.title}` : "No older craft"} onClick={() => older && onNavigate(older.slug)} disabled={!older}>
-                <ArrowLeft size={15} />
-              </IconButton>
-              <IconButton label={newer ? `Newer: ${newer.title}` : "No newer craft"} onClick={() => newer && onNavigate(newer.slug)} disabled={!newer}>
-                <ArrowRight size={15} />
-              </IconButton>
-            </div>
+              {paragraphs.length ? (
+                <div className="mt-5 flex max-w-prose flex-col gap-3 text-[15px] leading-relaxed text-ink/85">
+                  {paragraphs.map((paragraph) => (
+                    <p key={paragraph.slice(0, 32)}>{paragraph}</p>
+                  ))}
+                </div>
+              ) : null}
+              <p className="mt-6 flex flex-wrap items-center gap-x-3 text-[13px] text-muted">
+                <time dateTime={craft.date}>{formatDate(craft.date)}</time>
+                {site.repo ? (
+                  <a
+                    href={`${site.repo}/tree/main/src/crafts/${craft.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-0.5 transition-colors hover:text-ink"
+                  >
+                    Code
+                    <ArrowUpRight size={12} />
+                  </a>
+                ) : null}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+          <div className="absolute right-5 top-4 flex gap-2 sm:right-7 sm:top-5">
+            <IconButton label={older ? `Older: ${older.title}` : "No older craft"} onClick={() => older && onNavigate(older.slug)} disabled={!older}>
+              <ArrowLeft size={15} />
+            </IconButton>
+            <IconButton label={newer ? `Newer: ${newer.title}` : "No newer craft"} onClick={() => newer && onNavigate(newer.slug)} disabled={!newer}>
+              <ArrowRight size={15} />
+            </IconButton>
           </div>
-          {paragraphs.length ? (
-            <div className="mt-5 flex max-w-prose flex-col gap-3 text-[15px] leading-relaxed text-ink/85">
-              {paragraphs.map((paragraph) => (
-                <p key={paragraph.slice(0, 32)}>{paragraph}</p>
-              ))}
-            </div>
-          ) : null}
-          <p className="mt-6 flex flex-wrap items-center gap-x-3 text-[13px] text-muted">
-            <time dateTime={craft.date}>{formatDate(craft.date)}</time>
-            {site.repo ? (
-              <a
-                href={`${site.repo}/tree/main/src/crafts/${craft.slug}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-0.5 transition-colors hover:text-ink"
-              >
-                Code
-                <ArrowUpRight size={12} />
-              </a>
-            ) : null}
-          </p>
-        </motion.div>
+        </div>
       </motion.div>
     </div>
   );

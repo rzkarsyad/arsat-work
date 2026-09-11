@@ -90,3 +90,13 @@ page. The content model and routes are unchanged; presentation is not.
   and the text blurs in beneath it.
 - **Typography.** Geist Sans only. Instrument Serif and Geist Mono are gone
   from the UI, the crafts and the OG images. The headline is one short line.
+
+## Revision — 2026-09-11, later
+
+- **Popup navigation slides.** ← and → (and the arrow buttons) keep the
+  panel mounted and slide the stage and text sideways with a short blur,
+  towards the direction of travel; the panel's height follows. Closing
+  morphs back into the tile the popup was opened from. The popup is keyed per
+  open, so a quick close-then-open mounts a fresh popup from its own tile.
+- **Chips** are Title Case with a subtle surface when inactive.
+- **Footer** is the copyright line only.
