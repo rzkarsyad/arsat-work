@@ -6,7 +6,7 @@ import { Expand } from "./icons";
 
 /** Clicks that land on a control belong to the content, not to the tile. */
 const CONTROL =
-  'button, a, input, select, textarea, [role="button"], [role="switch"], [role="tab"], [contenteditable="true"]';
+  'button, a, input, select, textarea, [role="button"], [role="switch"], [role="tab"], [role="slider"], [contenteditable="true"]';
 
 type Props = {
   slug: string;

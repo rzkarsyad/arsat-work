@@ -3,23 +3,29 @@
 import type { CraftComponent } from "./types";
 
 import Craft0 from "./activity-rings/craft";
-import Craft1 from "./dynamic-island/craft";
-import Craft2 from "./emoji-tapback/craft";
-import Craft3 from "./hold-to-confirm/craft";
-import Craft4 from "./magnetic-button/craft";
-import Craft5 from "./number-ticker/craft";
-import Craft6 from "./segmented-control/craft";
-import Craft7 from "./spring-toggle/craft";
-import Craft8 from "./text-scramble/craft";
+import Craft1 from "./dock/craft";
+import Craft2 from "./dynamic-island/craft";
+import Craft3 from "./emoji-tapback/craft";
+import Craft4 from "./hold-to-confirm/craft";
+import Craft5 from "./magnetic-button/craft";
+import Craft6 from "./number-ticker/craft";
+import Craft7 from "./rubber-band-slider/craft";
+import Craft8 from "./segmented-control/craft";
+import Craft9 from "./spring-toggle/craft";
+import Craft10 from "./text-scramble/craft";
+import Craft11 from "./undo-toast/craft";
 
 export const components: Record<string, CraftComponent> = {
   "activity-rings": Craft0,
-  "dynamic-island": Craft1,
-  "emoji-tapback": Craft2,
-  "hold-to-confirm": Craft3,
-  "magnetic-button": Craft4,
-  "number-ticker": Craft5,
-  "segmented-control": Craft6,
-  "spring-toggle": Craft7,
-  "text-scramble": Craft8,
+  "dock": Craft1,
+  "dynamic-island": Craft2,
+  "emoji-tapback": Craft3,
+  "hold-to-confirm": Craft4,
+  "magnetic-button": Craft5,
+  "number-ticker": Craft6,
+  "rubber-band-slider": Craft7,
+  "segmented-control": Craft8,
+  "spring-toggle": Craft9,
+  "text-scramble": Craft10,
+  "undo-toast": Craft11,
 };
