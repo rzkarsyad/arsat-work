@@ -2,12 +2,28 @@
 // Add a design with `npm run new:design <slug>` or by creating src/designs/<slug>/meta.ts next to its image.
 import type { DesignMeta } from "./types";
 
-import meta0 from "./analytics-dashboard/meta";
-import meta1 from "./now-playing/meta";
-import meta2 from "./wallet-home/meta";
+import meta0 from "./campaign-details/meta";
+import meta1 from "./doma-marketplace/meta";
+import meta2 from "./efficien-dashboard/meta";
+import meta3 from "./efficien-landing/meta";
+import meta4 from "./email-analytics/meta";
+import meta5 from "./finex-app/meta";
+import meta6 from "./finex-design-system/meta";
+import meta7 from "./finex-landing/meta";
+import meta8 from "./petclear/meta";
+import meta9 from "./stratify-dashboard/meta";
+import meta10 from "./stratify-website/meta";
 
 export const metas: { slug: string; meta: DesignMeta }[] = [
-  { slug: "analytics-dashboard", meta: meta0 },
-  { slug: "now-playing", meta: meta1 },
-  { slug: "wallet-home", meta: meta2 },
+  { slug: "campaign-details", meta: meta0 },
+  { slug: "doma-marketplace", meta: meta1 },
+  { slug: "efficien-dashboard", meta: meta2 },
+  { slug: "efficien-landing", meta: meta3 },
+  { slug: "email-analytics", meta: meta4 },
+  { slug: "finex-app", meta: meta5 },
+  { slug: "finex-design-system", meta: meta6 },
+  { slug: "finex-landing", meta: meta7 },
+  { slug: "petclear", meta: meta8 },
+  { slug: "stratify-dashboard", meta: meta9 },
+  { slug: "stratify-website", meta: meta10 },
 ];
