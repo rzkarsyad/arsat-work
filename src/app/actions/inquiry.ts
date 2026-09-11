@@ -1,6 +1,7 @@
 "use server";
 
 import { Resend } from "resend";
+import { inquiryEmail } from "@/lib/inquiry-email";
 import { site } from "@/lib/site";
 
 export type InquiryValues = { name: string; email: string; message: string };
@@ -9,9 +10,6 @@ export type InquiryState = { ok: true } | { ok: false; error: string; values: In
 
 const LIMIT = { name: 80, email: 254, message: 2000 };
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const escapeHtml = (value: string) =>
-  value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string);
 
 /** Receives the paper form. Validates, then delivers through Resend with the sender as reply-to. */
 export async function sendInquiry(_previous: InquiryState, formData: FormData): Promise<InquiryState> {
@@ -39,13 +37,12 @@ export async function sendInquiry(_previous: InquiryState, formData: FormData): 
   if (!apiKey || !to) return fail("Sending isn't set up yet. Reach me on X or LinkedIn instead.");
 
   const resend = new Resend(apiKey);
+  const mail = inquiryEmail({ name, email, message });
   const { error } = await resend.emails.send({
     from: process.env.INQUIRY_FROM ?? `${site.brand} <onboarding@resend.dev>`,
     to: [to],
     replyTo: email,
-    subject: `Inquiry from ${name}`,
-    text: `From: ${name} <${email}>\n\n${message}`,
-    html: `<p><strong>${escapeHtml(name)}</strong> &lt;${escapeHtml(email)}&gt; wrote:</p><p style="white-space:pre-wrap">${escapeHtml(message)}</p>`,
+    ...mail,
   });
   if (error) {
     console.error("[inquiry] resend error", error);

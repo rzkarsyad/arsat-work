@@ -254,7 +254,7 @@ export function Inquiry() {
         onClick={() => setOpen(true)}
         className="rounded-full px-3 py-1.5 text-[13px] text-muted transition-colors hover:text-ink"
       >
-        Inquiry
+        Collab with me
       </button>
 
       <AnimatePresence>
