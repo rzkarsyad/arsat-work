@@ -70,6 +70,48 @@ const slide: Variants = {
   }),
 };
 
+/**
+ * Stacked blur bands, strongest at the outer edge. Each layer blurs what is
+ * behind it and is masked to a shorter run than the last, so the blur ramps up
+ * smoothly towards the edge rather than switching on at a line.
+ */
+const EDGE_LAYERS = [
+  { blur: 8, stop: 25 },
+  { blur: 4, stop: 50 },
+  { blur: 2, stop: 75 },
+  { blur: 1, stop: 100 },
+];
+
+/** Content passing under the floating controls blurs and washes out, the way iOS does it. */
+function ScrollEdge({ side, visible }: { side: "top" | "bottom"; visible: boolean }) {
+  const towards = side === "top" ? "to bottom" : "to top";
+  return (
+    <motion.div
+      aria-hidden
+      data-edge={side}
+      initial={false}
+      animate={{ opacity: visible ? 1 : 0 }}
+      transition={{ duration: 0.22, ease: "easeOut" }}
+      className={`pointer-events-none absolute inset-x-0 z-[5] h-20 ${side === "top" ? "top-0" : "bottom-0"}`}
+    >
+      {EDGE_LAYERS.map(({ blur, stop }) => {
+        const mask = `linear-gradient(${towards}, black 0%, black ${stop - 25}%, transparent ${stop}%)`;
+        return (
+          <div
+            key={blur}
+            className="absolute inset-0"
+            style={{ backdropFilter: `blur(${blur}px)`, WebkitBackdropFilter: `blur(${blur}px)`, maskImage: mask, WebkitMaskImage: mask }}
+          />
+        );
+      })}
+      <div
+        className="absolute inset-0"
+        style={{ background: `linear-gradient(${towards}, color-mix(in srgb, var(--surface) 62%, transparent), transparent 74%)` }}
+      />
+    </motion.div>
+  );
+}
+
 function IconButton({
   ref,
   label,
@@ -115,6 +157,8 @@ export function GalleryModal<T extends GalleryItem>({
   const [origin] = useState(item.slug);
   const closeButton = useRef<HTMLButtonElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
+  /** Which edges have content running past them, so only those show the effect. */
+  const [edges, setEdges] = useState({ top: false, bottom: false });
   /** False once the popup is closing: it must stop catching clicks meant for the grid. */
   const present = useIsPresent();
   const ratio = stageRatio?.(item);
@@ -131,6 +175,25 @@ export function GalleryModal<T extends GalleryItem>({
   /** A new item starts at the top rather than inheriting the last one's scroll. */
   useEffect(() => {
     scroller.current?.scrollTo({ top: 0 });
+  }, [item.slug]);
+
+  useEffect(() => {
+    const el = scroller.current;
+    if (!el) return;
+    const update = () => {
+      const overflow = el.scrollHeight - el.clientHeight;
+      setEdges({ top: el.scrollTop > 4, bottom: overflow > 4 && el.scrollTop < overflow - 4 });
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    // Content height changes as a craft animates or an image loads.
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    for (const child of el.children) observer.observe(child);
+    return () => {
+      el.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
   }, [item.slug]);
 
   useEffect(() => {
@@ -175,7 +238,7 @@ export function GalleryModal<T extends GalleryItem>({
           ratio ? "" : "max-w-3xl"
         }`}
       >
-        <div ref={scroller} className="relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
+        <div ref={scroller} className="no-scrollbar relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
           <AnimatePresence mode="popLayout" initial={false} custom={direction}>
             <motion.div
               key={item.slug}
@@ -212,6 +275,9 @@ export function GalleryModal<T extends GalleryItem>({
             </motion.div>
           </AnimatePresence>
         </div>
+
+        <ScrollEdge side="top" visible={edges.top} />
+        <ScrollEdge side="bottom" visible={edges.bottom} />
 
         {/* Controls float over the panel, so scrolling never takes them away. */}
         <div className="absolute right-3 top-3 z-10 flex gap-2">

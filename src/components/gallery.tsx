@@ -191,7 +191,7 @@ export function Gallery<T extends GalleryItem>({
       <div
         role="group"
         aria-label="Filter by tag"
-        className="-mx-4 mt-4 flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:mt-6 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden"
+        className="no-scrollbar -mx-4 mt-4 flex gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:mt-6 sm:flex-wrap sm:px-0"
       >
         <Chip active={tag === null} label="All" onClick={() => selectTag(null)} />
         {tags.map((t) => (

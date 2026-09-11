@@ -119,3 +119,12 @@ body {
     animation-delay: calc(var(--tile-index, 0) * 30ms);
   }
 }
+
+/* A scroller that still scrolls but shows no bar; the edge effect signals the overflow instead. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
