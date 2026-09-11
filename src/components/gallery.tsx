@@ -57,6 +57,14 @@ function useGridMetrics(grid: React.RefObject<HTMLDivElement | null>): Metrics |
  */
 export function Gallery({ initialSlug }: { initialSlug?: string }) {
   const [tag, setTag] = useState<Tag | null>(null);
+  /**
+   * Per-craft mount generation, bumped whenever a craft re-enters the grid.
+   * It is part of the tile's React key, so a tile that is still fading out
+   * when its craft is filtered back in keeps leaving while a fresh tile
+   * mounts in the new layout — instead of the old one being revived and
+   * sliding in from wherever it used to sit.
+   */
+  const [generation, setGeneration] = useState<Record<string, number>>({});
   const [active, setActive] = useState<string | null>(initialSlug ?? null);
   const grid = useRef<HTMLDivElement>(null);
   const metrics = useGridMetrics(grid);
@@ -105,7 +113,22 @@ export function Gallery({ initialSlug }: { initialSlug?: string }) {
 
   const entry = active ? getEntry(active) : undefined;
   const neighbours = active ? getNeighbours(active) : {};
-  const visible = tag ? crafts.filter((craft) => craft.tags.includes(tag)) : crafts;
+  const visibleFor = (filter: Tag | null) => (filter ? crafts.filter((craft) => craft.tags.includes(filter)) : crafts);
+  const visible = visibleFor(tag);
+
+  function selectTag(next: Tag | null) {
+    if (next === tag) return;
+    const staying = new Set(visible.map((craft) => craft.slug));
+    const entering = visibleFor(next).filter((craft) => !staying.has(craft.slug));
+    if (entering.length) {
+      setGeneration((current) => {
+        const bumped = { ...current };
+        for (const craft of entering) bumped[craft.slug] = (bumped[craft.slug] ?? 0) + 1;
+        return bumped;
+      });
+    }
+    setTag(next);
+  }
 
   return (
     <>
@@ -114,16 +137,16 @@ export function Gallery({ initialSlug }: { initialSlug?: string }) {
         aria-label="Filter by tag"
         className="-mx-4 mt-4 flex gap-0.5 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:mt-6 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden"
       >
-        <Chip active={tag === null} label="All" onClick={() => setTag(null)} />
+        <Chip active={tag === null} label="All" onClick={() => selectTag(null)} />
         {tagCounts().map(({ tag: t }) => (
-          <Chip key={t} active={tag === t} label={t} onClick={() => setTag(t)} />
+          <Chip key={t} active={tag === t} label={t} onClick={() => selectTag(t)} />
         ))}
       </div>
       <div ref={grid} className="masonry mt-4 sm:mt-5" data-packed={metrics ? "" : undefined}>
         <AnimatePresence mode="popLayout" initial={false}>
           {visible.map((craft, index) => (
             <CraftTile
-              key={craft.slug}
+              key={`${craft.slug}:${generation[craft.slug] ?? 0}`}
               craft={craft}
               index={index}
               rowSpan={metrics ? Math.ceil(metrics.columnWidth / (craft.ratio ?? 1) + metrics.gap) : undefined}

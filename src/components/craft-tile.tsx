@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useIsPresent } from "motion/react";
 import type { Craft } from "@/crafts/types";
 import { spring } from "@/lib/motion";
 import { CraftStage } from "./craft-stage";
@@ -19,6 +19,13 @@ type Props = {
   /** Grid rows (1px each) this tile occupies once the column width is known. */
   rowSpan?: number;
   onOpen: (slug: string) => void;
+  /**
+   * AnimatePresence's popLayout mode hands the exiting child a ref and uses
+   * it to lift the element out of the grid flow for its exit animation. It
+   * must reach the outer cell, or exiting tiles keep their grid slots until
+   * they unmount and the grid re-packs late.
+   */
+  ref?: React.Ref<HTMLDivElement>;
 };
 
 /**
@@ -26,17 +33,25 @@ type Props = {
  * position when the grid reflows; the inner element is the visible tile that
  * morphs into the popup, so the two must stay separate.
  */
-export function CraftTile({ craft, index, rowSpan, onOpen }: Props) {
+export function CraftTile({ craft, index, rowSpan, onOpen, ref }: Props) {
+  /**
+   * Once a tile is exiting, popLayout moves it to absolute positioning in
+   * place. Motion would treat that as a layout change and run the settle
+   * spring on an invisible element, and AnimatePresence would wait for it
+   * before removing the tile — so layout animation is switched off on exit.
+   */
+  const present = useIsPresent();
   return (
     <motion.div
-      layout="position"
+      ref={ref}
+      layout={present ? "position" : false}
       transition={spring}
       exit={{ opacity: 0, scale: 0.98, transition: { duration: 0.15, ease: "easeOut" } }}
       style={{ "--tile-index": Math.min(index, 10), gridRowEnd: rowSpan ? `span ${rowSpan}` : undefined } as React.CSSProperties}
-      className="tile-in cell"
+      className={`tile-in cell ${present ? "" : "pointer-events-none"}`}
     >
       <motion.div
-        layoutId={`craft-${craft.slug}`}
+        layoutId={present ? `craft-${craft.slug}` : undefined}
         transition={spring}
         data-craft={craft.slug}
         style={{ aspectRatio: craft.ratio ?? 1, borderRadius: 20 }}
