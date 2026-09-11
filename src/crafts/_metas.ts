@@ -2,20 +2,26 @@
 // Add a craft with `npm run new <slug>` or by creating src/crafts/<slug>/{meta.ts,craft.tsx}.
 import type { CraftMeta } from "./types";
 
-import meta0 from "./dynamic-island/meta";
-import meta1 from "./hold-to-confirm/meta";
-import meta2 from "./magnetic-button/meta";
-import meta3 from "./number-ticker/meta";
-import meta4 from "./segmented-control/meta";
-import meta5 from "./spring-toggle/meta";
-import meta6 from "./text-scramble/meta";
+import meta0 from "./activity-rings/meta";
+import meta1 from "./dynamic-island/meta";
+import meta2 from "./emoji-tapback/meta";
+import meta3 from "./fold/meta";
+import meta4 from "./hold-to-confirm/meta";
+import meta5 from "./magnetic-button/meta";
+import meta6 from "./number-ticker/meta";
+import meta7 from "./segmented-control/meta";
+import meta8 from "./spring-toggle/meta";
+import meta9 from "./text-scramble/meta";
 
 export const metas: { slug: string; meta: CraftMeta }[] = [
-  { slug: "dynamic-island", meta: meta0 },
-  { slug: "hold-to-confirm", meta: meta1 },
-  { slug: "magnetic-button", meta: meta2 },
-  { slug: "number-ticker", meta: meta3 },
-  { slug: "segmented-control", meta: meta4 },
-  { slug: "spring-toggle", meta: meta5 },
-  { slug: "text-scramble", meta: meta6 },
+  { slug: "activity-rings", meta: meta0 },
+  { slug: "dynamic-island", meta: meta1 },
+  { slug: "emoji-tapback", meta: meta2 },
+  { slug: "fold", meta: meta3 },
+  { slug: "hold-to-confirm", meta: meta4 },
+  { slug: "magnetic-button", meta: meta5 },
+  { slug: "number-ticker", meta: meta6 },
+  { slug: "segmented-control", meta: meta7 },
+  { slug: "spring-toggle", meta: meta8 },
+  { slug: "text-scramble", meta: meta9 },
 ];
