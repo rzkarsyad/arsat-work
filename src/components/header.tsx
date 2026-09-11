@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { site } from "@/lib/site";
 import { GitHub, Rss } from "./icons";
+import { NavLinks } from "./nav-links";
 import { ThemeToggle } from "./theme-toggle";
 
 const iconLink =
@@ -9,10 +10,13 @@ const iconLink =
 export function Header() {
   return (
     <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 sm:px-8">
-      <Link href="/" className="flex items-baseline gap-1.5 rounded-sm">
-        <span className="text-[17px] font-semibold tracking-tight text-ink">Craft</span>
-        <span className="text-[13px] text-muted">by {site.author}</span>
-      </Link>
+      <div className="flex items-center gap-5">
+        <Link href="/" className="flex items-baseline gap-1.5 rounded-sm">
+          <span className="text-[17px] font-semibold tracking-tight text-ink">Craft</span>
+          <span className="text-[13px] text-muted">by {site.author}</span>
+        </Link>
+        <NavLinks />
+      </div>
       <nav aria-label="Site" className="flex items-center gap-0.5">
         <a href={site.links.github} target="_blank" rel="noreferrer" aria-label="GitHub" className={iconLink}>
           <GitHub />

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { entries, lastUpdated } from "@/crafts/catalog";
+import { designs, designsUpdated } from "@/designs/catalog";
 import { site } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -10,6 +11,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: craft.date,
       changeFrequency: "monthly" as const,
       priority: 0.7,
+    })),
+    { url: `${site.url}/design`, lastModified: designsUpdated, changeFrequency: "weekly" as const, priority: 0.9 },
+    ...designs.map((design) => ({
+      url: `${site.url}/design/${design.slug}`,
+      lastModified: design.date,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
     })),
   ];
 }

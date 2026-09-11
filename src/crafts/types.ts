@@ -61,10 +61,12 @@ export type CraftProps = {
 
 export type CraftComponent = ComponentType<CraftProps>;
 
-export type CraftEntry = CraftMeta & {
+export type CraftEntry = Omit<CraftMeta, "ratio"> & {
   slug: string;
   /** Stable sequential number, assigned by date ascending. */
   number: number;
+  /** Resolved tile proportion (defaults to 1). */
+  ratio: number;
 };
 
 export type Craft = CraftEntry & {

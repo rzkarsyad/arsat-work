@@ -11,7 +11,8 @@
     "prebuild": "node scripts/generate-registry.mjs",
     "new": "node scripts/new-craft.mjs",
     "crafts": "node scripts/generate-registry.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "new:design": "node scripts/new-design.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

@@ -2,26 +2,41 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useIsPresent, type Variants } from "motion/react";
-import type { CraftEntry } from "@/crafts/types";
 import { formatDate } from "@/lib/format";
 import { spring } from "@/lib/motion";
-import { site } from "@/lib/site";
-import { CraftStage } from "./craft-stage";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Close, Reset } from "./icons";
+import { ArrowLeft, ArrowRight, Close, Reset } from "./icons";
 
-type Props = {
-  craft: CraftEntry;
-  /** +1 when moving to a newer craft, -1 to an older one. Sets the slide direction. */
+/** What the gallery needs to know about an item, whatever kind it is. */
+export type GalleryItem = {
+  slug: string;
+  number: number;
+  title: string;
+  description: string;
+  date: string;
+  tags: readonly string[];
+  /** width ÷ height of the tile. */
+  ratio: number;
+  notes?: string;
+};
+
+type Props<T extends GalleryItem> = {
+  item: T;
+  /** +1 when moving to a newer item, -1 to an older one. Sets the slide direction. */
   direction: 1 | -1;
-  older?: CraftEntry;
-  newer?: CraftEntry;
+  older?: T;
+  newer?: T;
   onClose: () => void;
   onNavigate: (slug: string) => void;
+  renderStage: (item: T, runKey: number) => React.ReactNode;
+  /** Extra links after the date, e.g. Code or Source. */
+  renderMeta?: (item: T) => React.ReactNode;
+  /** Show a Reset control that remounts the stage. */
+  resettable?: boolean;
 };
 
 /**
- * Moving between crafts slides the content sideways inside the panel, the
- * way a pager does: the new craft enters from the side you are heading to
+ * Moving between items slides the content sideways inside the panel, the
+ * way a pager does: the new item enters from the side you are heading to
  * while the old one leaves the other way, both with a short blur.
  */
 const slide: Variants = {
@@ -76,15 +91,25 @@ function IconButton({
   );
 }
 
-export function CraftModal({ craft, direction, older, newer, onClose, onNavigate }: Props) {
+export function GalleryModal<T extends GalleryItem>({
+  item,
+  direction,
+  older,
+  newer,
+  onClose,
+  onNavigate,
+  renderStage,
+  renderMeta,
+  resettable = false,
+}: Props<T>) {
   const [run, setRun] = useState(0);
   /** The tile this popup grew out of. It shrinks back into that tile on close, wherever you navigated. */
-  const [origin] = useState(craft.slug);
+  const [origin] = useState(item.slug);
   const closeButton = useRef<HTMLButtonElement>(null);
   /** False once the popup is closing: it must stop catching clicks meant for the grid. */
   const present = useIsPresent();
   const paragraphs =
-    craft.notes
+    item.notes
       ?.split(/\n\s*\n/)
       .map((paragraph) => paragraph.trim())
       .filter(Boolean) ?? [];
@@ -108,7 +133,7 @@ export function CraftModal({ craft, direction, older, newer, onClose, onNavigate
     <div
       role="dialog"
       aria-modal="true"
-      aria-labelledby={`craft-title-${craft.slug}`}
+      aria-labelledby={`item-title-${item.slug}`}
       className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-8 ${present ? "" : "pointer-events-none"}`}
     >
       <motion.button
@@ -122,7 +147,7 @@ export function CraftModal({ craft, direction, older, newer, onClose, onNavigate
         className="absolute inset-0 bg-black/30 backdrop-blur-xl dark:bg-black/60"
       />
       <motion.div
-        layoutId={`craft-${origin}`}
+        layoutId={`tile-${origin}`}
         layout
         transition={spring}
         style={{ borderRadius: 28 }}
@@ -131,7 +156,7 @@ export function CraftModal({ craft, direction, older, newer, onClose, onNavigate
         <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-stage sm:aspect-[3/2]">
           <AnimatePresence mode="popLayout" initial={false} custom={direction}>
             <motion.div
-              key={craft.slug}
+              key={item.slug}
               data-slide="stage"
               custom={direction}
               variants={slide}
@@ -140,13 +165,15 @@ export function CraftModal({ craft, direction, older, newer, onClose, onNavigate
               exit="exit"
               className="absolute inset-0"
             >
-              <CraftStage slug={craft.slug} eager runKey={run} padding={32} className="absolute inset-0" />
+              {renderStage(item, run)}
             </motion.div>
           </AnimatePresence>
           <div className="absolute right-3 top-3 flex gap-2">
-            <IconButton label="Reset" onClick={() => setRun((n) => n + 1)}>
-              <Reset size={15} />
-            </IconButton>
+            {resettable ? (
+              <IconButton label="Reset" onClick={() => setRun((n) => n + 1)}>
+                <Reset size={15} />
+              </IconButton>
+            ) : null}
             <IconButton ref={closeButton} label="Close" onClick={onClose}>
               <Close size={15} />
             </IconButton>
@@ -156,7 +183,7 @@ export function CraftModal({ craft, direction, older, newer, onClose, onNavigate
         <div className="relative overflow-y-auto overflow-x-hidden">
           <AnimatePresence mode="popLayout" initial={false} custom={direction}>
             <motion.div
-              key={craft.slug}
+              key={item.slug}
               data-slide="text"
               custom={direction}
               variants={slide}
@@ -165,10 +192,10 @@ export function CraftModal({ craft, direction, older, newer, onClose, onNavigate
               exit="exit"
               className="px-5 pb-5 pr-28 pt-4 sm:px-7 sm:pb-7 sm:pr-32 sm:pt-5"
             >
-              <h2 id={`craft-title-${craft.slug}`} className="text-xl font-medium tracking-tight text-ink sm:text-2xl">
-                {craft.title}
+              <h2 id={`item-title-${item.slug}`} className="text-xl font-medium tracking-tight text-ink sm:text-2xl">
+                {item.title}
               </h2>
-              <p className="mt-1 text-[15px] leading-relaxed text-muted">{craft.description}</p>
+              <p className="mt-1 text-[15px] leading-relaxed text-muted">{item.description}</p>
               {paragraphs.length ? (
                 <div className="mt-5 flex max-w-prose flex-col gap-3 text-[15px] leading-relaxed text-ink/85">
                   {paragraphs.map((paragraph) => (
@@ -177,26 +204,16 @@ export function CraftModal({ craft, direction, older, newer, onClose, onNavigate
                 </div>
               ) : null}
               <p className="mt-6 flex flex-wrap items-center gap-x-3 text-[13px] text-muted">
-                <time dateTime={craft.date}>{formatDate(craft.date)}</time>
-                {site.repo ? (
-                  <a
-                    href={`${site.repo}/tree/main/src/crafts/${craft.slug}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-0.5 transition-colors hover:text-ink"
-                  >
-                    Code
-                    <ArrowUpRight size={12} />
-                  </a>
-                ) : null}
+                <time dateTime={item.date}>{formatDate(item.date)}</time>
+                {renderMeta?.(item)}
               </p>
             </motion.div>
           </AnimatePresence>
           <div className="absolute right-5 top-4 flex gap-2 sm:right-7 sm:top-5">
-            <IconButton label={older ? `Older: ${older.title}` : "No older craft"} onClick={() => older && onNavigate(older.slug)} disabled={!older}>
+            <IconButton label={older ? `Older: ${older.title}` : "Nothing older"} onClick={() => older && onNavigate(older.slug)} disabled={!older}>
               <ArrowLeft size={15} />
             </IconButton>
-            <IconButton label={newer ? `Newer: ${newer.title}` : "No newer craft"} onClick={() => newer && onNavigate(newer.slug)} disabled={!newer}>
+            <IconButton label={newer ? `Newer: ${newer.title}` : "Nothing newer"} onClick={() => newer && onNavigate(newer.slug)} disabled={!newer}>
               <ArrowRight size={15} />
             </IconButton>
           </div>

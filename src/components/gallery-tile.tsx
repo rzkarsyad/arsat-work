@@ -1,24 +1,23 @@
 "use client";
 
 import { motion, useIsPresent } from "motion/react";
-import type { Craft } from "@/crafts/types";
 import { spring } from "@/lib/motion";
-import { CraftStage } from "./craft-stage";
 import { Expand } from "./icons";
 
-/** Tiles mount their craft immediately up to this index; the rest wait for scroll. */
-const EAGER = 8;
-
-/** Clicks that land on a control belong to the craft, not to the tile. */
+/** Clicks that land on a control belong to the content, not to the tile. */
 const CONTROL =
   'button, a, input, select, textarea, [role="button"], [role="switch"], [role="tab"], [contenteditable="true"]';
 
 type Props = {
-  craft: Craft;
+  slug: string;
+  title: string;
+  /** width ÷ height of the tile. */
+  ratio: number;
   index: number;
   /** Grid rows (1px each) this tile occupies once the column width is known. */
   rowSpan?: number;
   onOpen: (slug: string) => void;
+  children: React.ReactNode;
   /**
    * AnimatePresence's popLayout mode hands the exiting child a ref and uses
    * it to lift the element out of the grid flow for its exit animation. It
@@ -33,12 +32,12 @@ type Props = {
  * position when the grid reflows; the inner element is the visible tile that
  * morphs into the popup, so the two must stay separate.
  */
-export function CraftTile({ craft, index, rowSpan, onOpen, ref }: Props) {
+export function GalleryTile({ slug, title, ratio, index, rowSpan, onOpen, children, ref }: Props) {
   /**
    * Once a tile is exiting, popLayout moves it to absolute positioning in
-   * place. Motion would treat that as a layout change and run the settle
-   * spring on an invisible element, and AnimatePresence would wait for it
-   * before removing the tile — so layout animation is switched off on exit.
+   * place. Layout animation is switched off so Motion does not run the settle
+   * spring on an invisible element (which delays removal), and pointer events
+   * are dropped so it cannot swallow a click meant for the tile beneath.
    */
   const present = useIsPresent();
   return (
@@ -51,40 +50,23 @@ export function CraftTile({ craft, index, rowSpan, onOpen, ref }: Props) {
       className={`tile-in cell ${present ? "" : "pointer-events-none"}`}
     >
       <motion.div
-        layoutId={present ? `craft-${craft.slug}` : undefined}
+        layoutId={present ? `tile-${slug}` : undefined}
         transition={spring}
-        data-craft={craft.slug}
-        style={{ aspectRatio: craft.ratio ?? 1, borderRadius: 20 }}
+        data-tile={slug}
+        style={{ aspectRatio: ratio, borderRadius: 20 }}
         className="group relative w-full overflow-hidden border border-line bg-stage transition-colors hover:border-line-strong"
         onClick={(event) => {
           if ((event.target as HTMLElement).closest(CONTROL)) return;
-          onOpen(craft.slug);
+          onOpen(slug);
         }}
       >
-        {craft.cover ? (
-          craft.cover.type === "video" ? (
-            <video
-              className="absolute inset-0 h-full w-full object-cover"
-              src={craft.cover.src}
-              autoPlay
-              muted
-              loop
-              playsInline
-              aria-label={craft.cover.alt ?? craft.title}
-            />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element -- covers are author-supplied local files of unknown dimensions
-            <img className="absolute inset-0 h-full w-full object-cover" src={craft.cover.src} alt={craft.cover.alt ?? craft.title} />
-          )
-        ) : (
-          <CraftStage slug={craft.slug} preview eager={index < EAGER} className="absolute inset-0" />
-        )}
+        {children}
         <button
           type="button"
-          aria-label={`Open ${craft.title}`}
+          aria-label={`Open ${title}`}
           onClick={(event) => {
             event.stopPropagation();
-            onOpen(craft.slug);
+            onOpen(slug);
           }}
           className="tile-affordance absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-surface/90 text-muted opacity-0 shadow-sm ring-1 ring-line backdrop-blur transition-opacity hover:text-ink focus-visible:opacity-100 group-hover:opacity-100"
         >

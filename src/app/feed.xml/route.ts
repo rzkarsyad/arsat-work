@@ -1,4 +1,5 @@
 import { entries } from "@/crafts/catalog";
+import { designs } from "@/designs/catalog";
 import { site } from "@/lib/site";
 
 export const dynamic = "force-static";
@@ -16,9 +17,13 @@ function escape(value: string): string {
 }
 
 export function GET() {
-  const items = entries
+  const posts = [
+    ...entries.map((craft) => ({ ...craft, url: `${site.url}/${craft.slug}` })),
+    ...designs.map((design) => ({ ...design, url: `${site.url}/design/${design.slug}` })),
+  ].sort((a, b) => b.date.localeCompare(a.date));
+  const items = posts
     .map((craft) => {
-      const url = `${site.url}/${craft.slug}`;
+      const url = craft.url;
       return [
         "<item>",
         `<title>${escape(craft.title)}</title>`,

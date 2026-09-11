@@ -10,7 +10,7 @@ const byDateAsc = [...metas].sort((a, b) =>
 
 /** Every craft, newest first, with stable sequential numbers. */
 export const entries: CraftEntry[] = byDateAsc
-  .map((item, index) => ({ ...item.meta, slug: item.slug, number: index + 1 }))
+  .map((item, index) => ({ ...item.meta, slug: item.slug, number: index + 1, ratio: item.meta.ratio ?? 1 }))
   .reverse();
 
 export const lastUpdated: string | undefined = entries[0]?.date;

@@ -100,3 +100,16 @@ page. The content model and routes are unchanged; presentation is not.
   open, so a quick close-then-open mounts a fresh popup from its own tile.
 - **Chips** are Title Case with a subtle surface when inactive.
 - **Footer** is the copyright line only.
+
+## Revision — 2026-09-11, Design section
+
+Arsat asked for a dedicated page for UI design work. `/design` shows static
+shots (screens, mockups) in the same masonry and popup as the crafts, with
+its own tag set and a header nav (Crafts · Design). A shot is
+`src/designs/<slug>/meta.ts` importing its image next to it, so the tile's
+proportion is known at build time; `npm run new:design <slug>` scaffolds one.
+The gallery, tile and popup were generalised (`Gallery`, `GalleryTile`,
+`GalleryModal`) with a URL base per section; crafts keep the Reset control
+and the Code link, designs get an optional Open link. Feed and sitemap cover
+both. Three sample shots rendered from mockups seed the section until Arsat
+replaces them.

@@ -34,6 +34,21 @@ Numbering is automatic and stable: crafts are numbered by date ascending, and
 listed newest first. Tags come from the fixed list in
 [`src/crafts/types.ts`](src/crafts/types.ts) — add one there to use it.
 
+## Adding a design shot
+
+The **Design** section (`/design`) is for static UI work: screens, mockups,
+explorations that are pictures rather than components.
+
+```bash
+npm run new:design my-screen "My screen"
+```
+
+That creates `src/designs/my-screen/meta.ts`, which imports `./cover.png`.
+Drop the shot in next to it (any size; the tile takes the image's own
+proportion) and fill in the title, description, date and tags. It appears on
+`/design` and at `/design/my-screen`. Because the image is imported, its size
+is known at build time and the grid never jumps.
+
 ## Writing a craft
 
 - Use the theme tokens, not raw colours: `bg-surface`, `text-ink`,

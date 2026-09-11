@@ -2,11 +2,9 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { crafts, getEntry, getNeighbours, tagCounts } from "@/crafts";
-import type { Tag } from "@/crafts/types";
 import { spring } from "@/lib/motion";
-import { CraftModal } from "./craft-modal";
-import { CraftTile } from "./craft-tile";
+import { GalleryModal, type GalleryItem } from "./gallery-modal";
+import { GalleryTile } from "./gallery-tile";
 
 const titleCase = (label: string) => label.charAt(0).toUpperCase() + label.slice(1);
 
@@ -54,17 +52,40 @@ function useGridMetrics(grid: React.RefObject<HTMLDivElement | null>): Metrics |
   return metrics;
 }
 
+export type GalleryProps<T extends GalleryItem> = {
+  /** Newest first. */
+  items: T[];
+  /** Tags to offer as filters, in order. */
+  tags: readonly string[];
+  initialSlug?: string;
+  /** URL prefix of item pages: "" for crafts, "/design" for designs. */
+  basePath?: string;
+  renderTile: (item: T, index: number) => React.ReactNode;
+  renderStage: (item: T, runKey: number) => React.ReactNode;
+  renderMeta?: (item: T) => React.ReactNode;
+  resettable?: boolean;
+};
+
 /**
- * The index: tag filter, masonry grid of live tiles, and the craft popup. The
- * popup keeps the URL in sync with the History API so every craft stays
+ * A section index: tag filter, masonry grid of tiles, and the popup. The
+ * popup keeps the URL in sync with the History API so every item stays
  * linkable without leaving the page.
  */
-export function Gallery({ initialSlug }: { initialSlug?: string }) {
-  const [tag, setTag] = useState<Tag | null>(null);
+export function Gallery<T extends GalleryItem>({
+  items,
+  tags,
+  initialSlug,
+  basePath = "",
+  renderTile,
+  renderStage,
+  renderMeta,
+  resettable,
+}: GalleryProps<T>) {
+  const [tag, setTag] = useState<string | null>(null);
   /**
-   * Per-craft mount generation, bumped whenever a craft re-enters the grid.
+   * Per-item mount generation, bumped whenever an item re-enters the grid.
    * It is part of the tile's React key, so a tile that is still fading out
-   * when its craft is filtered back in keeps leaving while a fresh tile
+   * when its item is filtered back in keeps leaving while a fresh tile
    * mounts in the new layout — instead of the old one being revived and
    * sliding in from wherever it used to sit.
    */
@@ -74,7 +95,7 @@ export function Gallery({ initialSlug }: { initialSlug?: string }) {
   const [direction, setDirection] = useState<1 | -1>(1);
   /**
    * Bumped on every open, never on navigation. It keys the popup, so moving
-   * between crafts slides content inside one panel, while opening again
+   * between items slides content inside one panel, while opening again
    * right after closing mounts a fresh popup that morphs out of its own tile
    * instead of reviving the one still on its way out.
    */
@@ -84,19 +105,27 @@ export function Gallery({ initialSlug }: { initialSlug?: string }) {
   /** Whether the open popup pushed a history entry, so closing can pop it. */
   const pushed = useRef(false);
 
-  const open = useCallback((slug: string) => {
-    pushed.current = true;
-    setSession((current) => current + 1);
-    setActive(slug);
-    window.history.pushState({ craft: slug }, "", `/${slug}`);
-  }, []);
+  const getItem = useCallback((slug: string) => items.find((item) => item.slug === slug), [items]);
+  const indexUrl = basePath || "/";
+  const itemUrl = (slug: string) => `${basePath}/${slug}`;
+
+  const open = useCallback(
+    (slug: string) => {
+      pushed.current = true;
+      setSession((current) => current + 1);
+      setActive(slug);
+      window.history.pushState({ item: slug }, "", itemUrl(slug));
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- itemUrl only depends on basePath
+    [basePath],
+  );
 
   function navigate(slug: string) {
-    const from = active ? getEntry(active) : undefined;
-    const to = getEntry(slug);
+    const from = active ? getItem(active) : undefined;
+    const to = getItem(slug);
     if (from && to) setDirection(to.number > from.number ? 1 : -1);
     setActive(slug);
-    window.history.replaceState({ craft: slug }, "", `/${slug}`);
+    window.history.replaceState({ item: slug }, "", itemUrl(slug));
   }
 
   const close = useCallback(() => {
@@ -105,19 +134,20 @@ export function Gallery({ initialSlug }: { initialSlug?: string }) {
       pushed.current = false;
       window.history.back();
     } else {
-      window.history.replaceState(null, "", "/");
+      window.history.replaceState(null, "", indexUrl);
     }
-  }, []);
+  }, [indexUrl]);
 
   useEffect(() => {
     function onPopState() {
-      const slug = window.location.pathname.replace(/^\/+|\/+$/g, "");
+      const path = window.location.pathname.replace(/\/+$/, "");
+      const slug = path.startsWith(basePath) ? path.slice(basePath.length).replace(/^\/+/, "") : "";
       pushed.current = false;
-      setActive(slug && getEntry(slug) ? slug : null);
+      setActive(slug && getItem(slug) ? slug : null);
     }
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, []);
+  }, [basePath, getItem]);
 
   useEffect(() => {
     if (!active) return;
@@ -128,19 +158,20 @@ export function Gallery({ initialSlug }: { initialSlug?: string }) {
     };
   }, [active]);
 
-  const entry = active ? getEntry(active) : undefined;
-  const neighbours = active ? getNeighbours(active) : {};
-  const visibleFor = (filter: Tag | null) => (filter ? crafts.filter((craft) => craft.tags.includes(filter)) : crafts);
+  const entry = active ? getItem(active) : undefined;
+  const activeIndex = active ? items.findIndex((item) => item.slug === active) : -1;
+  const neighbours = activeIndex >= 0 ? { newer: items[activeIndex - 1], older: items[activeIndex + 1] } : {};
+  const visibleFor = (filter: string | null) => (filter ? items.filter((item) => item.tags.includes(filter)) : items);
   const visible = visibleFor(tag);
 
-  function selectTag(next: Tag | null) {
+  function selectTag(next: string | null) {
     if (next === tag) return;
-    const staying = new Set(visible.map((craft) => craft.slug));
-    const entering = visibleFor(next).filter((craft) => !staying.has(craft.slug));
+    const staying = new Set(visible.map((item) => item.slug));
+    const entering = visibleFor(next).filter((item) => !staying.has(item.slug));
     if (entering.length) {
       setGeneration((current) => {
         const bumped = { ...current };
-        for (const craft of entering) bumped[craft.slug] = (bumped[craft.slug] ?? 0) + 1;
+        for (const item of entering) bumped[item.slug] = (bumped[item.slug] ?? 0) + 1;
         return bumped;
       });
     }
@@ -155,33 +186,40 @@ export function Gallery({ initialSlug }: { initialSlug?: string }) {
         className="-mx-4 mt-4 flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:mt-6 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden"
       >
         <Chip active={tag === null} label="All" onClick={() => selectTag(null)} />
-        {tagCounts().map(({ tag: t }) => (
+        {tags.map((t) => (
           <Chip key={t} active={tag === t} label={t} onClick={() => selectTag(t)} />
         ))}
       </div>
       <div ref={grid} className="masonry mt-4 sm:mt-5" data-packed={metrics ? "" : undefined}>
         <AnimatePresence mode="popLayout" initial={false}>
-          {visible.map((craft, index) => (
-            <CraftTile
-              key={`${craft.slug}:${generation[craft.slug] ?? 0}`}
-              craft={craft}
+          {visible.map((item, index) => (
+            <GalleryTile
+              key={`${item.slug}:${generation[item.slug] ?? 0}`}
+              slug={item.slug}
+              title={item.title}
+              ratio={item.ratio}
               index={index}
-              rowSpan={metrics ? Math.ceil(metrics.columnWidth / (craft.ratio ?? 1) + metrics.gap) : undefined}
+              rowSpan={metrics ? Math.ceil(metrics.columnWidth / item.ratio + metrics.gap) : undefined}
               onOpen={open}
-            />
+            >
+              {renderTile(item, index)}
+            </GalleryTile>
           ))}
         </AnimatePresence>
       </div>
       <AnimatePresence>
         {entry ? (
-          <CraftModal
+          <GalleryModal
             key={`popup-${session}`}
-            craft={entry}
+            item={entry}
             direction={direction}
             older={neighbours.older}
             newer={neighbours.newer}
             onClose={close}
             onNavigate={navigate}
+            renderStage={renderStage}
+            renderMeta={renderMeta}
+            resettable={resettable}
           />
         ) : null}
       </AnimatePresence>
