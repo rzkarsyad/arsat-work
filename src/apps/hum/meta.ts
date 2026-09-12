@@ -6,7 +6,7 @@ export default defineApp({
   name: "Hum",
   tagline: "Floating karaoke lyrics for your Mac",
   platform: "macOS",
-  url: "https://hum-rose.vercel.app",
+  url: "https://hum.arsat.work",
   date: "2026-09-12",
   cover,
   icon,
