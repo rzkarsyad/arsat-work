@@ -68,7 +68,7 @@ to show a small pill on the cover, for example "Coming soon".
 `/about` is plain content: the copy lives in `src/components/about.tsx`, and
 the role, location and social links it shows come from `src/lib/site.ts`.
 The stamps beside the text are listed in `src/about/photos.ts` (drop a square
-JPEG in `src/about/photos/` and add it there with a title and a month/year);
+JPEG in `src/about/photos/` and add it there with a title);
 the perforated shape comes from `src/lib/stamp.ts`. Its share image is
 `src/app/about/opengraph-image.tsx`.
 

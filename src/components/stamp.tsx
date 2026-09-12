@@ -42,9 +42,6 @@ export function Stamp({ photo, sizes, children }: { photo: Photo; sizes: string;
         <span className="absolute left-[9%] top-[5.5%] text-[4.4cqw] font-medium uppercase leading-none tracking-[0.14em]">
           {photo.title}
         </span>
-        <span className="absolute bottom-[5.5%] right-[9%] text-[4.4cqw] font-medium uppercase leading-none tracking-[0.14em]">
-          {photo.date}
-        </span>
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.16] mix-blend-multiply" style={{ backgroundImage: GRAIN }} />
         {children}
       </div>
