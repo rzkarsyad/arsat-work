@@ -29,5 +29,6 @@ export const site = {
     x: "https://x.com/arsatdesign",
     linkedin: "https://www.linkedin.com/in/haloarsyad/",
     contra: "https://contra.com/arsatdesign",
+    instagram: "https://www.instagram.com/aarsaat/",
   },
 } as const;
