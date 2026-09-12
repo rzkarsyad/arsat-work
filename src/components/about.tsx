@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { photos } from "@/about/photos";
 import { site } from "@/lib/site";
 import { PhotoPile } from "./photo-pile";
@@ -9,10 +10,17 @@ const ELSEWHERE = [
 ];
 
 /** Label + value rows under the intro; "Elsewhere" is rendered separately so its links stay links. */
-const FACTS = [
+const FACTS: { label: string; value: ReactNode }[] = [
   {
     label: "Now",
-    value: `${site.role}, open to async collaboration across time zones`,
+    // Breaks after "open to" on purpose, and "time zones" never splits.
+    value: (
+      <>
+        {site.role}, open to
+        <br />
+        async collaboration across time&nbsp;zones
+      </>
+    ),
   },
   { label: "Based in", value: `${site.location}, ${site.timezone}` },
 ];
