@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+const SECTIONS = ["/design", "/apps", "/about"];
+
 const LINKS = [
-  { href: "/", label: "Crafts", match: (path: string) => !path.startsWith("/design") && !path.startsWith("/about") },
+  { href: "/", label: "Crafts", match: (path: string) => !SECTIONS.some((s) => path.startsWith(s)) },
   { href: "/design", label: "Design", match: (path: string) => path.startsWith("/design") },
+  { href: "/apps", label: "Apps", match: (path: string) => path.startsWith("/apps") },
   { href: "/about", label: "About", match: (path: string) => path.startsWith("/about") },
 ];
 
@@ -20,7 +23,7 @@ export function NavLinks() {
             key={href}
             href={href}
             aria-current={active ? "page" : undefined}
-            className={`rounded-full px-2.5 py-1.5 text-[13px] transition-colors sm:px-3 ${
+            className={`rounded-full px-2 py-1.5 text-[12px] transition-colors sm:px-3 sm:text-[13px] ${
               active ? "text-ink" : "text-muted hover:text-ink"
             }`}
           >

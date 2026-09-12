@@ -49,6 +49,20 @@ proportion) and fill in the title, description, date and tags. It appears on
 `/design` and at `/design/my-screen`. Because the image is imported, its size
 is known at build time and the grid never jumps.
 
+## Adding an app
+
+The **Apps** section (`/apps`) lists products with their own sites. Each card
+is a cover, an icon, a name and a one-line tagline, and links out.
+
+```bash
+npm run new:app my-app "My App"
+```
+
+That creates `src/apps/my-app/meta.ts`, which imports `./cover.png` and
+`./icon.png`. Drop both in next to it (a 3:2 cover and a square icon), fill in
+the tagline, platform, url and date, and it appears on `/apps`. Set `status`
+to show a small pill on the cover, for example "Coming soon".
+
 ## Editing the About page
 
 `/about` is plain content: the copy lives in `src/components/about.tsx`, and

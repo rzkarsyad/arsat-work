@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { entries, lastUpdated } from "@/crafts/catalog";
+import { appsUpdated } from "@/apps/catalog";
 import { designs, designsUpdated } from "@/designs/catalog";
 import { site } from "@/lib/site";
 
@@ -19,6 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
       priority: 0.6,
     })),
+    { url: `${site.url}/apps`, lastModified: appsUpdated, changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${site.url}/about`, changeFrequency: "yearly" as const, priority: 0.5 },
   ];
 }

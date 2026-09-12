@@ -12,7 +12,8 @@
     "new": "node scripts/new-craft.mjs",
     "crafts": "node scripts/generate-registry.mjs",
     "typecheck": "tsc --noEmit",
-    "new:design": "node scripts/new-design.mjs"
+    "new:design": "node scripts/new-design.mjs",
+    "new:app": "node scripts/new-app.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
