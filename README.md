@@ -53,8 +53,9 @@ is known at build time and the grid never jumps.
 
 `/about` is plain content: the copy lives in `src/components/about.tsx`, and
 the role, location and social links it shows come from `src/lib/site.ts`.
-The prints beside the text are listed in `src/about/photos.ts` (drop a square
-JPEG in `src/about/photos/` and add it there). Its share image is
+The stamps beside the text are listed in `src/about/photos.ts` (drop a square
+JPEG in `src/about/photos/` and add it there with a title and a month/year);
+the perforated shape comes from `src/lib/stamp.ts`. Its share image is
 `src/app/about/opengraph-image.tsx`.
 
 ## Contact form
