@@ -2,8 +2,10 @@
 // Add an app with `npm run new:app <slug>` or by creating src/apps/<slug>/meta.ts next to its cover and icon.
 import type { AppMeta } from "./types";
 
-import meta0 from "./hum/meta";
+import meta0 from "./glyph-studio/meta";
+import meta1 from "./hum/meta";
 
 export const metas: { slug: string; meta: AppMeta }[] = [
-  { slug: "hum", meta: meta0 },
+  { slug: "glyph-studio", meta: meta0 },
+  { slug: "hum", meta: meta1 },
 ];
