@@ -116,3 +116,22 @@ export function Mail(props: IconProps) {
     </svg>
   );
 }
+
+export function SoundOn(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M11 5 6 9H3v6h3l5 4V5z" />
+      <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+      <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+    </svg>
+  );
+}
+
+export function SoundOff(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M11 5 6 9H3v6h3l5 4V5z" />
+      <path d="m16 9 5 6M21 9l-5 6" />
+    </svg>
+  );
+}

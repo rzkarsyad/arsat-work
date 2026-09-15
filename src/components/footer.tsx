@@ -1,5 +1,6 @@
 import { site } from "@/lib/site";
 import { Contra, LinkedIn, XLogo } from "./icons";
+import { SoundToggle } from "./sound-toggle";
 
 const SOCIALS = [
   { label: "X", href: site.links.x, Icon: XLogo },
@@ -13,7 +14,10 @@ export function Footer() {
       <span>
         © {new Date().getUTCFullYear()} {site.author}
       </span>
-      <nav aria-label="Social" className="-mr-2 flex items-center gap-0.5">
+      <div className="-mr-2 flex items-center gap-0.5">
+        <SoundToggle />
+        <span aria-hidden="true" className="mx-1.5 h-4 w-px bg-line" />
+        <nav aria-label="Social" className="flex items-center gap-0.5">
         {SOCIALS.map(({ label, href, Icon }) => (
           <a
             key={label}
@@ -26,7 +30,8 @@ export function Footer() {
             <Icon size={15} />
           </a>
         ))}
-      </nav>
+        </nav>
+      </div>
     </footer>
   );
 }

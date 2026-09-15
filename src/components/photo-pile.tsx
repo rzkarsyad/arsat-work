@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import type { Photo } from "@/about/photos";
 import { spring } from "@/lib/motion";
+import { playSound } from "@/lib/sound";
 import { site } from "@/lib/site";
 import { ArrowUpRight } from "./icons";
 import { Stamp } from "./stamp";
@@ -45,6 +46,7 @@ export function PhotoPile({ photos, className = "" }: { photos: Photo[]; classNa
   const bringForward = (i: number) => setOrder((current) => [...current.filter((x) => x !== i), i]);
 
   const openStamp = (i: number, el: HTMLElement, viaKeyboard: boolean) => {
+    playSound("open");
     const rect = el.getBoundingClientRect();
     setHovered(null);
     setOpen({ index: i, cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2, width: el.offsetWidth, viaKeyboard });
@@ -167,7 +169,11 @@ export function PhotoPile({ photos, className = "" }: { photos: Photo[]; classNa
                   photo={photos[open.index]}
                   origin={open}
                   rotate={SLOTS[open.index % SLOTS.length].rotate}
-                  onClose={() => setClosing(true)}
+                  onClose={() => {
+                    if (closing) return;
+                    playSound("close");
+                    setClosing(true);
+                  }}
                 />
               ) : null}
             </AnimatePresence>,

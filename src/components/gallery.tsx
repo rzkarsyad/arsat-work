@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { spring } from "@/lib/motion";
 import { GalleryModal, type GalleryItem } from "./gallery-modal";
 import { GalleryTile } from "./gallery-tile";
+import { playSound } from "@/lib/sound";
 
 const titleCase = (label: string) => label.charAt(0).toUpperCase() + label.slice(1);
 
@@ -114,6 +115,7 @@ export function Gallery<T extends GalleryItem>({
 
   const open = useCallback(
     (slug: string) => {
+      playSound("open");
       pushed.current = true;
       setSession((current) => current + 1);
       setActive(slug);
@@ -124,12 +126,14 @@ export function Gallery<T extends GalleryItem>({
   );
 
   function navigate(slug: string, dir: 1 | -1) {
+    playSound("step");
     setDirection(dir);
     setActive(slug);
     window.history.replaceState({ item: slug }, "", itemUrl(slug));
   }
 
   const close = useCallback(() => {
+    playSound("close");
     setActive(null);
     if (pushed.current) {
       pushed.current = false;
