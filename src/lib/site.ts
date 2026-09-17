@@ -5,14 +5,14 @@ export const site = {
   /** What the header shows. */
   brand: "arsat.work",
   /** What metadata, Open Graph, the feed and search engines see. */
-  name: "Rizki Arsyad - Product Designer",
+  name: "Rizki Arsyad - Senior Product Designer",
   author: "Rizki Arsyad",
   /** Shown on the About page and its share image. */
   role: "Senior Product Designer",
   location: "Indonesia",
   timezone: "GMT+7",
   description:
-    "Interaction experiments, UI details and small delights by Rizki Arsyad, product designer.",
+    "Interaction experiments, UI details and small delights by Rizki Arsyad, senior product designer.",
   /** Canonical origin. NEXT_PUBLIC_SITE_URL is set to https://arsat.work in production. */
   url:
     process.env.NEXT_PUBLIC_SITE_URL ??

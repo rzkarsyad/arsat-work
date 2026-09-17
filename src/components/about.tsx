@@ -36,8 +36,8 @@ export function About() {
       <div className="mt-6 sm:mt-8 lg:mt-10 lg:grid lg:grid-cols-[minmax(0,38rem)_minmax(0,1fr)] lg:gap-x-16">
         <div className="max-w-[38rem] space-y-5 text-[17px] leading-[1.6] text-ink sm:text-[19px] lg:col-start-1 lg:row-start-1">
           <p>
-            I’m a product designer based in {site.location}, working on web,
-            mobile and SaaS products. Over the past five years I’ve shipped
+            I’m a senior product designer based in {site.location}, working
+            on web, mobile and SaaS products. Over the past five years I’ve shipped
             dashboards, mobile apps and landing pages for fintech, field service
             and project management companies, turning complex workflows into
             clean, scalable interfaces with handoffs developers actually like.
