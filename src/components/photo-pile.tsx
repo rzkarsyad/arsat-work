@@ -129,7 +129,7 @@ export function PhotoPile({ photos, className = "" }: { photos: Photo[]; classNa
                       exit={{ opacity: 0, y: 4 }}
                       transition={{ duration: 0.16 }}
                       style={{ rotate: -slot.rotate }}
-                      className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#1c1b19] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-white"
+                      className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#1c1c1c] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-white"
                     >
                       {photo.title}
                     </motion.span>
@@ -244,7 +244,7 @@ function StampOverlay({ photo, origin, rotate, onClose }: { photo: Photo; origin
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="absolute inset-0 bg-[#161513]/92 backdrop-blur-xl"
+        className="absolute inset-0 bg-[#161616]/92 backdrop-blur-xl"
       />
       <motion.div
         data-open-stamp

@@ -17,8 +17,8 @@ export async function ogFonts() {
   ];
 }
 
-const INK = "#171614";
-const MUTED = "#6b6862";
+const INK = "#161616";
+const MUTED = "#6b6b6b";
 const ACCENT = "#e4552b";
 
 export function OgFrame({ eyebrow, title, footer }: { eyebrow?: string; title: string; footer?: string }) {
@@ -31,7 +31,7 @@ export function OgFrame({ eyebrow, title, footer }: { eyebrow?: string; title: s
         flexDirection: "column",
         justifyContent: "space-between",
         padding: "64px 72px",
-        background: "#faf9f6",
+        background: "#f7f7f7",
         color: INK,
         fontFamily: "Geist",
       }}
