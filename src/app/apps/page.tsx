@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { AppGrid } from "@/components/app-grid";
+import { openGraphBase } from "@/lib/metadata";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Apps",
   description: `Apps and products made by ${site.author}.`,
-  openGraph: { title: "Apps", url: "/apps" },
+  openGraph: { ...openGraphBase, title: "Apps", url: "/apps" },
 };
 
 export default function AppsPage() {

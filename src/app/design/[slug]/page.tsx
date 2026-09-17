@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DesignHome } from "@/components/design-home";
 import { designs, getDesign } from "@/designs/catalog";
+import { openGraphBase } from "@/lib/metadata";
 
 type Params = { slug: string };
 
@@ -19,6 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title: design.title,
     description: design.description,
     openGraph: {
+      ...openGraphBase,
       type: "article",
       title: design.title,
       description: design.description,

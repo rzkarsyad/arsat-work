@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Home } from "@/components/home";
 import { entries, getEntry } from "@/crafts/catalog";
+import { openGraphBase } from "@/lib/metadata";
 
 type Params = { slug: string };
 
@@ -19,6 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title: craft.title,
     description: craft.description,
     openGraph: {
+      ...openGraphBase,
       type: "article",
       title: craft.title,
       description: craft.description,
