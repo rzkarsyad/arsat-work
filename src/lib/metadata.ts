@@ -10,3 +10,6 @@ export const openGraphBase = {
   siteName: site.name,
   type: "website",
 } as const;
+
+/** The About page's own summary, shared with the Person in its structured data. */
+export const aboutDescription = `${site.author} is a senior product designer based in ${site.location}, working on web, mobile and SaaS products.`;

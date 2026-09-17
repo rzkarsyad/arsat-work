@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
 import { About } from "@/components/about";
-import { openGraphBase } from "@/lib/metadata";
-import { site } from "@/lib/site";
+import { JsonLd } from "@/components/json-ld";
+import { aboutJsonLd } from "@/lib/jsonld";
+import { aboutDescription, openGraphBase } from "@/lib/metadata";
 
 export const metadata: Metadata = {
   title: "About",
-  description: `${site.author} is a senior product designer based in ${site.location}, working on web, mobile and SaaS products.`,
+  description: aboutDescription,
   openGraph: { ...openGraphBase, title: "About", url: "/about" },
 };
 
 export default function AboutPage() {
-  return <About />;
+  return (
+    <>
+      <JsonLd data={aboutJsonLd} />
+      <About />
+    </>
+  );
 }
