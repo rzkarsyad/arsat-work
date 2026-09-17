@@ -44,45 +44,41 @@ type Props<T extends GalleryItem> = {
 /**
  * Moving between items slides the content sideways inside the panel, the
  * way a pager does: the new item enters from the side you are heading to
- * while the old one leaves the other way, both with a short blur.
+ * while the old one leaves the other way, crossfading as it goes.
  */
 const slide: Variants = {
-  enter: (direction: number) => ({ x: direction * 72, opacity: 0, filter: "blur(10px)" }),
+  enter: (direction: number) => ({ x: direction * 72, opacity: 0 }),
   center: {
     x: 0,
     opacity: 1,
-    filter: "blur(0px)",
     transition: {
       x: { type: "spring", visualDuration: 0.42, bounce: 0 },
       opacity: { duration: 0.28 },
-      filter: { duration: 0.32 },
     },
   },
   exit: (direction: number) => ({
     x: direction * -72,
     opacity: 0,
-    filter: "blur(10px)",
     transition: {
       x: { type: "spring", visualDuration: 0.36, bounce: 0 },
       opacity: { duration: 0.2 },
-      filter: { duration: 0.2 },
     },
   }),
 };
 
 /**
- * Stacked blur bands, strongest at the outer edge. Each layer blurs what is
- * behind it and is masked to a shorter run than the last, so the blur ramps up
- * smoothly towards the edge rather than switching on at a line.
+ * The scrim that fades content out at a scrolling edge. A straight
+ * `surface → transparent` ramp bands visibly against a near-flat panel, so
+ * the alpha follows a raised cosine sampled in steps: full surface at the
+ * edge, nothing at the inner end, and no seam at either.
  */
-const EDGE_LAYERS = [
-  { blur: 8, stop: 25 },
-  { blur: 4, stop: 50 },
-  { blur: 2, stop: 75 },
-  { blur: 1, stop: 100 },
-];
+const SCRIM_STOPS = Array.from({ length: 12 }, (_, i) => {
+  const position = i / 11;
+  const alpha = (1 + Math.cos(Math.PI * position)) / 2;
+  return `color-mix(in srgb, var(--surface) ${(alpha * 100).toFixed(1)}%, transparent) ${(position * 100).toFixed(1)}%`;
+}).join(", ");
 
-/** Content passing under the floating controls blurs and washes out, the way iOS does it. */
+/** Content running past the floating controls fades into the panel rather than blurring under it. */
 function ScrollEdge({ side, visible }: { side: "top" | "bottom"; visible: boolean }) {
   const towards = side === "top" ? "to bottom" : "to top";
   return (
@@ -92,23 +88,9 @@ function ScrollEdge({ side, visible }: { side: "top" | "bottom"; visible: boolea
       initial={false}
       animate={{ opacity: visible ? 1 : 0 }}
       transition={{ duration: 0.22, ease: "easeOut" }}
+      style={{ background: `linear-gradient(${towards}, ${SCRIM_STOPS})` }}
       className={`pointer-events-none absolute inset-x-0 z-[5] h-20 ${side === "top" ? "top-0" : "bottom-0"}`}
-    >
-      {EDGE_LAYERS.map(({ blur, stop }) => {
-        const mask = `linear-gradient(${towards}, black 0%, black ${stop - 25}%, transparent ${stop}%)`;
-        return (
-          <div
-            key={blur}
-            className="absolute inset-0"
-            style={{ backdropFilter: `blur(${blur}px)`, WebkitBackdropFilter: `blur(${blur}px)`, maskImage: mask, WebkitMaskImage: mask }}
-          />
-        );
-      })}
-      <div
-        className="absolute inset-0"
-        style={{ background: `linear-gradient(${towards}, color-mix(in srgb, var(--surface) 62%, transparent), transparent 74%)` }}
-      />
-    </motion.div>
+    />
   );
 }
 
