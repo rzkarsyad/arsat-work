@@ -13,6 +13,14 @@ export const site = {
   timezone: "GMT+7",
   description:
     "Interaction experiments, UI details and small delights by Rizki Arsyad, senior product designer.",
+  /**
+   * Last real edit to the hand-written pages — the home page and About. The
+   * crafts, designs and apps carry their own dates; this covers the prose that
+   * does not. Bump it when that copy changes, and only then: Google trusts a
+   * sitemap's lastmod for exactly as long as it stays accurate, so a date
+   * pinned to the build would teach it to ignore the field across the site.
+   */
+  pagesUpdated: "2026-09-17",
   /** Canonical origin. NEXT_PUBLIC_SITE_URL is set to https://arsat.work in production. */
   url:
     process.env.NEXT_PUBLIC_SITE_URL ??

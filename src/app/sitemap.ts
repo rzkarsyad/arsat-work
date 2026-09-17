@@ -4,9 +4,15 @@ import { appsUpdated } from "@/apps/catalog";
 import { designs, designsUpdated } from "@/designs/catalog";
 import { site } from "@/lib/site";
 
+/** The newest of some ISO dates, skipping the ones that are not there. They sort lexically. */
+function newest(...dates: (string | undefined)[]): string | undefined {
+  return dates.filter((date): date is string => Boolean(date)).sort().at(-1);
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
-    { url: site.url, lastModified: lastUpdated, changeFrequency: "weekly", priority: 1 },
+    // The index shows both the craft grid and the written headline, so either moving counts.
+    { url: site.url, lastModified: newest(lastUpdated, site.pagesUpdated), changeFrequency: "weekly", priority: 1 },
     ...entries.map((craft) => ({
       url: `${site.url}/${craft.slug}`,
       lastModified: craft.date,
@@ -21,6 +27,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     })),
     { url: `${site.url}/apps`, lastModified: appsUpdated, changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${site.url}/about`, changeFrequency: "yearly" as const, priority: 0.5 },
+    { url: `${site.url}/about`, lastModified: site.pagesUpdated, changeFrequency: "monthly" as const, priority: 0.5 },
   ];
 }
