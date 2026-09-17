@@ -45,7 +45,7 @@ function MusicBody() {
       <span className="h-9 w-9 rounded-lg bg-[conic-gradient(from_200deg,#f97316,#ec4899,#8b5cf6,#f97316)]" />
       <span className="flex flex-col text-left leading-tight">
         <span className="text-[13px] font-medium text-white">Small delights</span>
-        <span className="text-[11px] text-white/50">Craft by Arsat</span>
+        <span className="text-[11px] text-white/50">arsat.work</span>
       </span>
       <span className="ml-2 flex h-4 items-end gap-[3px]" aria-hidden>
         {[0, 1, 2, 3].map((bar) => (
