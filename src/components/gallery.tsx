@@ -90,7 +90,7 @@ export function Gallery<T extends GalleryItem>({
    * Per-item mount generation, bumped whenever an item re-enters the grid.
    * It is part of the tile's React key, so a tile that is still fading out
    * when its item is filtered back in keeps leaving while a fresh tile
-   * mounts in the new layout — instead of the old one being revived and
+   * mounts in the new layout, instead of the old one being revived and
    * sliding in from wherever it used to sit.
    */
   const [generation, setGeneration] = useState<Record<string, number>>({});

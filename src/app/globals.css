@@ -99,7 +99,7 @@ body {
 
 /*
  * Tile reveal. Done in CSS rather than JS so tiles are never gated on
- * hydration — without the media query they are simply visible. `translate`
+ * hydration; without the media query they are simply visible. `translate`
  * is used instead of `transform` so it cannot fight Motion's layout writes.
  */
 @media (prefers-reduced-motion: no-preference) {

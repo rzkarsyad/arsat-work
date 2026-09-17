@@ -19,7 +19,7 @@ type Props = {
   padding?: number;
   /**
    * The stage has no position of its own so it can fill whatever the caller
-   * positions it in — pass `absolute inset-0`, not a size of your own.
+   * positions it in: pass `absolute inset-0`, not a size of your own.
    */
   className?: string;
 };

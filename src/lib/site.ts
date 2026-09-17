@@ -14,7 +14,7 @@ export const site = {
   description:
     "Interaction experiments, UI details and small delights by Rizki Arsyad, senior product designer.",
   /**
-   * Last real edit to the hand-written pages — the home page and About. The
+   * Last real edit to the hand-written pages: the home page and About. The
    * crafts, designs and apps carry their own dates; this covers the prose that
    * does not. Bump it when that copy changes, and only then: Google trusts a
    * sitemap's lastmod for exactly as long as it stays accurate, so a date
@@ -26,7 +26,7 @@ export const site = {
     process.env.NEXT_PUBLIC_SITE_URL ??
     (vercelUrl ? `https://${vercelUrl}` : "http://localhost:3000"),
   /**
-   * Public repository. Set NEXT_PUBLIC_REPO_URL once the repo exists — the
+   * Public repository. Set NEXT_PUBLIC_REPO_URL once the repo exists: the
    * "Source" and per-craft "Code" links only render when it does, so the site
    * never ships a link to a repository that is not there.
    */

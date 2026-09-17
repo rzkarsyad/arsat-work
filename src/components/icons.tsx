@@ -100,7 +100,7 @@ export function LinkedIn(props: IconProps) {
 
 /**
  * Contra's mark: four concave petals parted by a cross. The gap is cut into
- * the path itself, so the icon sits on any background — the placeholder drew
+ * the path itself, so the icon sits on any background; the placeholder drew
  * it as a stroke in the canvas colour and smeared on anything else.
  */
 export function Contra(props: IconProps) {

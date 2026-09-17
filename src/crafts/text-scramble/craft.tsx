@@ -6,7 +6,7 @@ import { useDemo } from "@/lib/demo";
 import type { CraftProps } from "../types";
 
 const PHRASES = ["Design", "Prototype", "Iterate", "Ship it"];
-const GLYPHS = "!<>-_\\/[]{}—=+*^?#";
+const GLYPHS = "!<>-_\\/[]{}=+*^?#";
 const DURATION = 720;
 const CHURN = 0.28;
 

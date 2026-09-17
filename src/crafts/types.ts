@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 
 /**
- * The fixed set of tags. Keep it short — tags are filters, not folksonomy.
+ * The fixed set of tags. Keep it short: tags are filters, not folksonomy.
  * Add a new one here and it will show up as a chip once a craft uses it.
  */
 export const TAGS = [
